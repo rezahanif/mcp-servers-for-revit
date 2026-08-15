@@ -2,6 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerTools } from "./tools/register.js";
+import { startHostStateProbe } from "./hoststate.js";
 
 // 创建服务器实例
 const server = new McpServer({
@@ -13,6 +14,9 @@ const server = new McpServer({
 async function main() {
   // 注册工具
   await registerTools(server);
+
+  // AiConnect host-state signaling (adapter; env-gated — no-op standalone)
+  startHostStateProbe();
 
   // 连接到传输层
   const transport = new StdioServerTransport();
