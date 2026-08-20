@@ -1,0 +1,91 @@
+name: Standardized Connector CI (Windows Simulation)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-and-package:
+    runs-on: windows-latest
+    steps:
+      - name: Check out connector repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js (for Node connectors)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 1. Run Strict Connector Contract & Gateway Stdio Simulator
+      - name: Validate CP20 Manifest & Execute JSON-RPC Test Suite
+        shell: powershell
+        run: |
+          # Fetch contract verifier
+          $verifier = @"
+          import os, sys, json, time, subprocess, inspect, typing
+          from pathlib import Path
+
+          root = Path('.').resolve()
+          print('=== Validating CP20 Manifest & Spec ===')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          marketplace = json.loads((root / 'marketplace.json').read_text(encoding='utf-8'))
+          assert (root / 'TUTORIAL.md').exists(), 'TUTORIAL.md missing'
+
+          for req in ['manifest_schema_version', 'package_format_version', 'id', 'name', 'version', 'runtime', 'entry', 'platform']:
+              assert req in manifest, f'Missing CP20 field: {req}'
+          assert manifest['id'] == marketplace['id'], 'ID mismatch between manifest and marketplace'
+          assert (root / manifest['entry']).exists(), f"Entrypoint {manifest['entry']} missing on disk"
+
+          print(f"=== Simulating Gateway Process Manager (stdio) ===")
+          runtime = manifest.get('runtime', 'python')
+          entry_path = str(root / manifest['entry'])
+          cmd = [sys.executable, entry_path] if runtime == 'python' else (['node', entry_path] if runtime == 'node' else [entry_path])
+
+          env = os.environ.copy()
+          env['MCP_PORT'] = '58788'
+          env['MCP_LICENSE_TOKEN'] = 'ci-test-token'
+          proc = subprocess.Popen(cmd, cwd=str(root), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+          time.sleep(0.3)
+          assert proc.poll() is None, f'Process exited early: {proc.stderr.read()}'
+
+          # Handshake
+          proc.stdin.write(json.dumps({'jsonrpc': '2.0', 'id': 1, 'method': 'initialize'}) + '\n')
+          proc.stdin.flush()
+          init_res = json.loads(proc.stdout.readline().strip())
+          assert 'serverInfo' in init_res.get('result', {}), f'Bad initialize: {init_res}'
+          print('✓ initialize OK:', init_res['result']['serverInfo']['name'])
+
+          proc.stdin.write(json.dumps({'jsonrpc': '2.0', 'id': 2, 'method': 'tools/list'}) + '\n')
+          proc.stdin.flush()
+          tools_res = json.loads(proc.stdout.readline().strip())
+          tools = tools_res.get('result', {}).get('tools', [])
+          assert len(tools) > 0, 'No tools registered'
+          print(f'✓ tools/list OK ({len(tools)} tools discovered)')
+
+          proc.terminate()
+          print('🎉 ALL CONNECTOR CI TESTS PASSED!')
+          "@
+          python -c "$verifier"
+
+      # 2. Test Packaging Script & Dynamic SHA-256 Calculation
+      - name: Build Distribution Package (.acpkg / .zip)
+        shell: bash
+        run: |
+          if [ -f scripts/package-acpkg.sh ]; then
+            bash scripts/package-acpkg.sh
+          fi
+
+      # 3. Upload Packaged Artifact (Proof of Build)
+      - name: Upload Packaged Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: connector-dist
+          path: dist/
+          if-no-files-found: ignore
