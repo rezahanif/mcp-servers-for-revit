@@ -1,0 +1,24 @@
+{
+  "id": "revit-mcp",
+  "name": "Autodesk Revit BIM & Modeling",
+  "category": "BIM & Architecture",
+  "tags": ["revit", "bim", "architecture", "mcp", "autodesk", "structural"],
+  "author": {
+    "name": "AiConnect Official",
+    "url": "https://aiconnect.fun",
+    "verified": true
+  },
+  "description": "Automate Autodesk Revit BIM workflows, element queries, parameter inspection, and geometry extraction directly from AI agents.",
+  "license": "MIT",
+  "homepage": "https://github.com/rezahanif/mcp-servers-for-revit",
+  "assets": {
+    "icon": "assets/logo.svg",
+    "banner": "assets/banner.png"
+  },
+  "capabilities": [
+    "Query Revit model elements and parameters",
+    "Extract views, sheets, and schedules",
+    "Inspect and modify element geometry",
+    "Family and type management automation"
+  ]
+}
