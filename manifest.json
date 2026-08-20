@@ -1,15 +1,15 @@
 {
+  "manifest_schema_version": 1,
+  "package_format_version": 1,
   "id": "revit-mcp",
   "name": "Revit Connector",
   "version": "1.0.0",
-  "manifest_schema_version": 1,
-  "package_format_version": 1,
   "platform": {
     "os": "windows",
     "arch": "x64"
   },
   "runtime": "node",
-  "entry": "build/index.js",
+  "entry": "server/build/index.js",
   "min_app_version": "0.4.0",
   "entitlement_tier": "pro",
   "port_env_var": "MCP_PORT",
