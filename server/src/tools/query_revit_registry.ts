@@ -1,0 +1,81 @@
+import { z } from "zod";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let _registry: any = null;
+
+function loadRegistry() {
+  if (_registry) return _registry;
+  _registry = JSON.parse(fs.readFileSync(path.join(__dirname, "revit_function_registry.json"), "utf-8"));
+  return _registry;
+}
+
+export function registerQueryRevitRegistryTool(server: McpServer) {
+  server.tool(
+    "query_revit_registry",
+    "Query the Revit function registry — 49 verified entries (27 MCP tools + 22 C# API calls). Search by keyword or filter by category to find ready-to-use functions.",
+    {
+      query: z
+        .string()
+        .optional()
+        .describe("Search keyword to match function path or description"),
+      category: z
+        .string()
+        .optional()
+        .describe("Filter by category (creation, query, modification, annotation, data, visualization, system, execution, interoperability, interaction, errors, events, advanced, mep, structural, architecture, core)"),
+      kind: z
+        .string()
+        .optional()
+        .describe("Filter by kind: 'Tool' (MCP tool) or 'CSharp' (C# API call)"),
+    },
+    async (args, extra) => {
+      try {
+        const reg = loadRegistry();
+        let entries = reg.entries;
+
+        if (args.query) {
+          const q = args.query.toLowerCase();
+          entries = entries.filter(
+            (e: any) =>
+              e.path.toLowerCase().includes(q) ||
+              e.description.toLowerCase().includes(q)
+          );
+        }
+
+        if (args.category) {
+          entries = entries.filter((e: any) => e.category === args.category);
+        }
+
+        if (args.kind) {
+          entries = entries.filter((e: any) => e.kind === args.kind);
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                total: entries.length,
+                filters: { query: args.query, category: args.category, kind: args.kind },
+                entries: entries.slice(0, 20),
+                hint: entries.length > 20
+                  ? `Showing 20 of ${entries.length}. Narrow with query/category/kind.`
+                  : `Found ${entries.length} entries. Use send_code_to_revit for C# entries.`,
+              }, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [{ type: "text", text: JSON.stringify({ error: "registry_query_failed", message: msg }) }],
+        };
+      }
+    }
+  );
+}

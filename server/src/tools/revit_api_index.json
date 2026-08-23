@@ -1,0 +1,187 @@
+{
+  "source": "Autodesk.Revit.SDK (NuGet) + revitapidocs.com + connector commandset analysis",
+  "version": "2025",
+  "total_namespaces": 30,
+  "namespaces": [
+    {
+      "name": "Autodesk.Revit.DB",
+      "description": "Core database API — Document, View, Element, Wall, Floor, Level, Family, Transaction, FilteredElementCollector",
+      "classes": ["Document", "View", "Element", "ElementId", "Wall", "Floor", "Level", "Family", "FamilySymbol", "FamilyInstance", "Room", "Grid", "Transaction", "Parameter", "FilteredElementCollector", "Category", "BuiltInParameter", "BuiltInCategory", "Reference", "XYZ", "BoundingBoxXYZ", "Solid", "Mesh", "Face", "Edge", "Curve", "Line", "Arc", "Circle", "Plane", "Transform", "CurveLoop", "GeometryElement", "GeometryInstance", "Options", "Material", "SubCategory", "WallType", "FloorType", "ViewPlan", "ViewSection", "View3D", "ViewSchedule", "ViewSheet", "Dimension", "Tag", "RoomTag", "SpatialElement", "ElementFilter", "LogicalAndFilter", "LogicalOrFilter", "Selection", "ObjectType"],
+      "relevance": "core"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Architecture",
+      "description": "Architecture — Room, SpatialElement, Area, Walkway, Ceiling, RoofFloor",
+      "classes": ["Room", "SpatialElement", "Area", "Ceiling", "RoofFloor"],
+      "relevance": "architecture"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Structure",
+      "description": "Structural — StructuralFraming, StructuralMember, AnalyticalMember, Foundation",
+      "classes": ["StructuralFraming", "StructuralMember", "Foundation", "AnalyticalMember"],
+      "relevance": "structural"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Mechanical",
+      "description": "MEP Mechanical — Duct, DuctType, MechanicalEquipment, MechanicalSystem",
+      "classes": ["Duct", "DuctType", "MechanicalEquipment", "MechanicalSystem"],
+      "relevance": "mep"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Electrical",
+      "description": "MEP Electrical — ElectricalSystem, ElectricalEquipment, WireType",
+      "classes": ["ElectricalSystem", "ElectricalEquipment", "WireType"],
+      "relevance": "mep"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Plumbing",
+      "description": "MEP Plumbing — Pipe, PipeType, PlumbingSystem, PlumbingFixtures",
+      "classes": ["Pipe", "PipeType", "PlumbingSystem", "PlumbingFixtures"],
+      "relevance": "mep"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Fabrication",
+      "description": "Fabrication — FabricationPart, RoutingElement, FabricationConfiguration",
+      "classes": ["FabricationPart", "RoutingElement", "FabricationConfiguration"],
+      "relevance": "fabrication"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Analysis",
+      "description": "Analysis — EnergyAnalysisDetailModel, SpatialFieldManager, AnalysisDisplayStyle",
+      "classes": ["EnergyAnalysisDetailModel", "SpatialFieldManager", "AnalysisDisplayStyle"],
+      "relevance": "analysis"
+    },
+    {
+      "name": "Autodesk.Revit.DB.ExtensibleStorage",
+      "description": "Extensible Storage — Schema, Entity, Field, SchemaBuilder",
+      "classes": ["Schema", "Entity", "Field", "SchemaBuilder"],
+      "relevance": "advanced"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Events",
+      "description": "Document/View Events — DocumentChanged, ViewActivated, DocumentOpened",
+      "classes": ["DocumentChanged", "ViewActivated", "DocumentOpened"],
+      "relevance": "events"
+    },
+    {
+      "name": "Autodesk.Revit.DB.ExternalService",
+      "description": "External Service — ExternalService, ExternalEvent, IExternalEventHandler",
+      "classes": ["ExternalService", "ExternalEvent", "IExternalEventHandler"],
+      "relevance": "advanced"
+    },
+    {
+      "name": "Autodesk.Revit.DB.IFC",
+      "description": "IFC Export — IFCExportConfiguration, IFCExportUtils",
+      "classes": ["IFCExportConfiguration", "IFCExportUtils"],
+      "relevance": "interoperability"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Infrastructure",
+      "description": "Infrastructure — Toposolid, CivilAlign",
+      "classes": ["Toposolid", "CivilAlign"],
+      "relevance": "infrastructure"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Lighting",
+      "description": "Lighting — LightFixture, LightGroup",
+      "classes": ["LightFixture", "LightGroup"],
+      "relevance": "lighting"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Macros",
+      "description": "Macros — MacroManager, MacroModule",
+      "classes": ["MacroManager", "MacroModule"],
+      "relevance": "advanced"
+    },
+    {
+      "name": "Autodesk.Revit.DB.PointClouds",
+      "description": "Point Clouds — PointCloudInstance, PointCloudOverrideSettings",
+      "classes": ["PointCloudInstance", "PointCloudOverrideSettings"],
+      "relevance": "reality-capture"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Steel",
+      "description": "Steel — SteelProfile, SteelConnection, SteelMaterial",
+      "classes": ["SteelProfile", "SteelConnection", "SteelMaterial"],
+      "relevance": "structural"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Structure.StructuralSections",
+      "description": "Structural Sections — StructuralSectionProfile, SectionProfile",
+      "classes": ["StructuralSectionProfile", "SectionProfile"],
+      "relevance": "structural"
+    },
+    {
+      "name": "Autodesk.Revit.DB.Visual",
+      "description": "Visual/Rendering — AssetLibrary, Asset, AssetProperties",
+      "classes": ["AssetLibrary", "Asset", "AssetProperties"],
+      "relevance": "visualization"
+    },
+    {
+      "name": "Autodesk.Revit.DB.DirectContext",
+      "description": "Direct Context Graphics — MeshStream, VertexStream, IndexStream",
+      "classes": ["MeshStream", "VertexStream", "IndexStream"],
+      "relevance": "visualization"
+    },
+    {
+      "name": "Autodesk.Revit.UI",
+      "description": "UI — UIApplication, UIDocument, RibbonPanel, PushButton, Selection",
+      "classes": ["UIApplication", "UIDocument", "RibbonPanel", "PushButton", "Selection"],
+      "relevance": "core"
+    },
+    {
+      "name": "Autodesk.Revit.UI.Events",
+      "description": "UI Events — DialogBoxShowing, ViewActivated",
+      "classes": ["DialogBoxShowing", "ViewActivated"],
+      "relevance": "events"
+    },
+    {
+      "name": "Autodesk.Revit.UI.Macros",
+      "description": "UI Macros — MacroManager integration",
+      "classes": ["MacroManager"],
+      "relevance": "advanced"
+    },
+    {
+      "name": "Autodesk.Revit.UI.Mechanical",
+      "description": "UI Mechanical — MEP analysis UI",
+      "classes": [],
+      "relevance": "mep"
+    },
+    {
+      "name": "Autodesk.Revit.UI.Plumbing",
+      "description": "UI Plumbing — Plumbing analysis UI",
+      "classes": [],
+      "relevance": "mep"
+    },
+    {
+      "name": "Autodesk.Revit.UI.Selection",
+      "description": "Selection — Selection, PickObject, PickElementsByRectangle",
+      "classes": ["Selection", "PickObject", "PickElementsByRectangle"],
+      "relevance": "core"
+    },
+    {
+      "name": "Autodesk.Revit.ApplicationServices",
+      "description": "Application — Application, ControlledApplication, VersionName",
+      "classes": ["Application", "ControlledApplication"],
+      "relevance": "core"
+    },
+    {
+      "name": "Autodesk.Revit.Attributes",
+      "description": "Attributes — TransactionAttribute, RegenerationAttribute, JournalingAttribute",
+      "classes": ["TransactionAttribute", "RegenerationAttribute"],
+      "relevance": "advanced"
+    },
+    {
+      "name": "Autodesk.Revit.Creation",
+      "description": "Creation — Document.Create, Application.Create",
+      "classes": ["Document.Create", "Application.Create"],
+      "relevance": "core"
+    },
+    {
+      "name": "Autodesk.Revit.Exceptions",
+      "description": "Exceptions — InvalidOperationException, AutodeskException",
+      "classes": ["InvalidOperationException", "AutodeskException"],
+      "relevance": "errors"
+    }
+  ]
+}

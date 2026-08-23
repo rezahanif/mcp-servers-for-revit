@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { RevitError, ConnectionError } from "./errors.js";
 export function registerCreateDimensionsTool(server) {
     server.tool("create_dimensions", "Create dimension annotations in the current Revit view. Supports dimensioning between elements (walls, doors, windows) by element IDs, or between two points with automatic reference detection. All coordinates are in millimeters (mm).", {
         dimensions: z
@@ -65,14 +66,14 @@ export function registerCreateDimensionsTool(server) {
             };
         }
         catch (error) {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `Dimension creation failed: ${error instanceof Error ? error.message : String(error)}`,
-                    },
-                ],
-            };
+            if (error instanceof RevitError) {
+                return { content: [{ type: "text", text: JSON.stringify(error.toPayload(), null, 2) }] };
+            }
+            const msg = error instanceof Error ? error.message : String(error);
+            const e = msg.includes("connection") || msg.includes("refused")
+                ? new ConnectionError(msg)
+                : new RevitError(msg, { error_code: "tool_error", hint: "Check Revit is running and parameters are valid." });
+            return { content: [{ type: "text", text: JSON.stringify(e.toPayload(), null, 2) }] };
         }
     });
 }

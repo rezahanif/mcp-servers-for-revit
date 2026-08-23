@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { RevitError, ConnectionError } from "./errors.js";
 export function registerCreateSurfaceBasedElementTool(server) {
     server.tool("create_surface_based_element", "Create one or more surface-based elements in Revit such as floors, ceilings, or roofs. Supports batch creation with detailed parameters including family type ID, boundary lines, thickness, and level information. All units are in millimeters (mm).", {
         data: z
@@ -55,14 +56,14 @@ export function registerCreateSurfaceBasedElementTool(server) {
             };
         }
         catch (error) {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `Create surface-based element failed: ${error instanceof Error ? error.message : String(error)}`,
-                    },
-                ],
-            };
+            if (error instanceof RevitError) {
+                return { content: [{ type: "text", text: JSON.stringify(error.toPayload(), null, 2) }] };
+            }
+            const msg = error instanceof Error ? error.message : String(error);
+            const e = msg.includes("connection") || msg.includes("refused")
+                ? new ConnectionError(msg)
+                : new RevitError(msg, { error_code: "tool_error", hint: "Check Revit is running and parameters are valid." });
+            return { content: [{ type: "text", text: JSON.stringify(e.toPayload(), null, 2) }] };
         }
     });
 }

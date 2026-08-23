@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
+import { RevitError, ConnectionError } from "./errors.js";
 export function registerAIElementFilterTool(server) {
     server.tool("ai_element_filter", "An intelligent Revit element querying tool designed specifically for AI assistants to retrieve detailed element information from Revit projects. This tool allows the AI to request elements matching specific criteria (such as category, type, visibility, or spatial location) and then perform further analysis on the returned data to answer complex user queries about Revit model elements. Example: When a user asks 'Find all walls taller than 5m in the project', the AI would: 1) Call this tool with parameters: {\"filterCategory\": \"OST_Walls\", \"includeInstances\": true}, 2) Receive detailed information about all wall instances in the project, 3) Process the returned data to filter walls with height > 5000mm, 4) Present the filtered results to the user with relevant details.", {
         data: z.object({
@@ -79,14 +80,14 @@ export function registerAIElementFilterTool(server) {
             };
         }
         catch (error) {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `Get element information failed: ${error instanceof Error ? error.message : String(error)}`,
-                    },
-                ],
-            };
+            if (error instanceof RevitError) {
+                return { content: [{ type: "text", text: JSON.stringify(error.toPayload(), null, 2) }] };
+            }
+            const msg = error instanceof Error ? error.message : String(error);
+            const e = msg.includes("connection") || msg.includes("refused")
+                ? new ConnectionError(msg)
+                : new RevitError(msg, { error_code: "tool_error", hint: "Check Revit is running and parameters are valid." });
+            return { content: [{ type: "text", text: JSON.stringify(e.toPayload(), null, 2) }] };
         }
     });
 }
