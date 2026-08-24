@@ -27,7 +27,6 @@
     {"path": "query_stored_data", "kind": "Tool", "description": "Query previously stored data", "category": "data", "verification_status": "seeded"},
     {"path": "send_code_to_revit", "kind": "Tool", "description": "Execute C# code in Revit with full API access", "category": "execution", "verification_status": "seeded"},
     {"path": "ai_element_filter", "kind": "Tool", "description": "AI-powered element filtering by criteria", "category": "query", "verification_status": "seeded"},
-    {"path": "say_hello", "kind": "Tool", "description": "Health check — verify Revit connection", "category": "system", "verification_status": "seeded"},
     {"path": "Document.Create.NewRoom", "kind": "CSharp", "description": "Create room from C# via Document.Create", "category": "creation", "namespace": "Autodesk.Revit.Creation", "verification_status": "seeded"},
     {"path": "Document.Create.NewFloor", "kind": "CSharp", "description": "Create floor from C# via Document.Create", "category": "creation", "namespace": "Autodesk.Revit.Creation", "verification_status": "seeded"},
     {"path": "Document.Create.NewWall", "kind": "CSharp", "description": "Create wall from C# via Document.Create", "category": "creation", "namespace": "Autodesk.Revit.Creation", "verification_status": "seeded"},

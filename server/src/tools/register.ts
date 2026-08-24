@@ -29,45 +29,76 @@ export async function registerTools(server: McpServer) {
     return origTool(name, schema, wrapped);
   };
 
-  // 获取当前文件的目录路径
+  // All expected tool files — keep in sync with actual .ts files in this directory.
+  // Excludes: errors.ts (typed errors), register.ts (this file), index.ts (barrel).
+  const EXPECTED_TOOLS = [
+    "ai_element_filter.ts",
+    "analyze_model_statistics.ts",
+    "color_elements.ts",
+    "create_dimensions.ts",
+    "create_grid.ts",
+    "create_level.ts",
+    "create_line_based_element.ts",
+    "create_point_based_element.ts",
+    "create_room.ts",
+    "create_structural_framing_system.ts",
+    "create_surface_based_element.ts",
+    "delete_element.ts",
+    "export_room_data.ts",
+    "get_available_family_types.ts",
+    "get_current_view_elements.ts",
+    "get_current_view_info.ts",
+    "get_material_quantities.ts",
+    "get_selected_elements.ts",
+    "list_revit_api_categories.ts",
+    "operate_element.ts",
+    "query_revit_registry.ts",
+    "query_stored_data.ts",
+    "revit_templates.ts",
+    "search_revit_api.ts",
+    "send_code_to_revit.ts",
+    "store_project_data.ts",
+    "store_room_data.ts",
+    "tag_all_rooms.ts",
+    "tag_all_walls.ts",
+  ];
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-
-  // 读取tools目录下的所有文件
   const files = fs.readdirSync(__dirname);
 
-  // 过滤出.ts或.js文件，但排除index文件和register文件
+  const KNOWN_NON_TOOLS = new Set(["errors.ts", "register.ts", "index.ts"]);
+
   const toolFiles = files.filter(
     (file) =>
       (file.endsWith(".ts") || file.endsWith(".js")) &&
-      file !== "index.ts" &&
-      file !== "index.js" &&
-      file !== "register.ts" &&
-      file !== "register.js"
+      !KNOWN_NON_TOOLS.has(file)
   );
 
-  // 动态导入并注册每个工具
+  let registered = 0;
   for (const file of toolFiles) {
-    try {
-      // 构建导入路径
-      const importPath = `./${file.replace(/\.(ts|js)$/, ".js")}`;
+    const importPath = `./${file.replace(/\.(ts|js)$/, ".js")}`;
+    const module = await import(importPath);
 
-      // 动态导入模块
-      const module = await import(importPath);
+    const registerFunctionName = Object.keys(module).find(
+      (key) => key.startsWith("register") && typeof module[key] === "function"
+    );
 
-      // 查找并执行注册函数
-      const registerFunctionName = Object.keys(module).find(
-        (key) => key.startsWith("register") && typeof module[key] === "function"
-      );
-
-      if (registerFunctionName) {
-        module[registerFunctionName](server);
-        console.error(`已注册工具: ${file}`);
-      } else {
-        console.warn(`警告: 在文件 ${file} 中未找到注册函数`);
-      }
-    } catch (error) {
-      console.error(`注册工具 ${file} 时出错:`, error);
+    if (registerFunctionName) {
+      module[registerFunctionName](server);
+      registered++;
+      console.error(`Registered tool: ${file}`);
+    } else {
+      console.warn(`Warning: no register function in ${file}`);
     }
+  }
+
+  if (registered < EXPECTED_TOOLS.length) {
+    const missing = EXPECTED_TOOLS.filter(
+      (t) => !toolFiles.some((f) => f.replace(/\.(ts|js)$/, ".js") === t.replace(/\.ts$/, ".js"))
+    );
+    throw new Error(
+      `Tool registration incomplete: expected ${EXPECTED_TOOLS.length}, got ${registered}. Missing: ${missing.join(", ")}`
+    );
   }
 }

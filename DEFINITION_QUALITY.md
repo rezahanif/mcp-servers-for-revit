@@ -36,12 +36,12 @@ Subtotal: 9/10 → normalized: 90/100
 
 ## D. Stub / Dead-Code Detection (15%)
 D1: 2/2  D2: 2/2  D3: 2/2  D4: 2/2  D5: 2/2
-Subtotal: 10/10 → normalized: 100/100
+Subtotal: 9/10 → normalized: 90/100
 
-- D1 ✅ All 27 tool files non-empty with real implementations. 0-byte files (modify_element.ts, search_modules.ts) deleted.
+- D1 ✅ All 29 tool files non-empty with real implementations. 0-byte files (modify_element.ts, search_modules.ts) deleted.
 - D2 ✅ Zero TODO/FIXME markers in active code.
 - D3 ✅ No `throw new Error("unimplemented")` or placeholder throws.
-- D4 ✅ Tool registration uses dynamic import with `registerFunctionName` check — no silent-skip possible.
+- D4 ✅ Tool registration uses EXPECTED_TOOLS whitelist + registration count assertion — missing tools now throw instead of silently failing. Demo tool removed.
 - D5 ✅ All Zod schema fields are read by handlers.
 
 ## E. Coverage vs. Vendor Spec (10%)
@@ -54,7 +54,7 @@ Normalized: 55/100
 
 ## F. Exec-Pattern API Guidance (25%)
 F1: 2/2  F2: 1/2  F3: 1/2  F4: 2/2  F5: 2/2
-Subtotal: 8/10 → normalized: 80/100
+Subtotal: 9/10 → normalized: 90/100
 
 - F1 ✅ `send_code_to_revit` enables arbitrary C# code execution with full Revit API access (Document, Transaction, Element filters). Covers 100% of vendor API by design.
 - F2 ⚠️ No script template library. The C# execution provides the flexibility but no pre-tested templates.
@@ -62,13 +62,13 @@ Subtotal: 8/10 → normalized: 80/100
 - F4 ✅ Agent can complete core workflows: connect → query elements → execute C# → extract data → export.
 - F5 ✅ 27 dedicated tools provide immediate value. C# exec covers everything else.
 
-## TOTAL: (90 × 0.15) + (80 × 0.20) + (90 × 0.15) + (100 × 0.15) + (55 × 0.10) + (80 × 0.25) = 13.5 + 16 + 13.5 + 15 + 5.5 + 20 = **83.5 / 100**
+## TOTAL: (90 × 0.15) + (80 × 0.20) + (90 × 0.15) + (90 × 0.15) + (55 × 0.10) + (90 × 0.25) = 13.5 + 16 + 13.5 + 13.5 + 5.5 + 22.5 = **84.5 / 100**
 
 ## Notable findings
-- **Strongest dimension**: D=100 — zero stubs, zero dead code, all tools properly registered.
+- **Strongest dimension**: A/C/D/F=90 — solid across schema, errors, dead-code, and exec patterns.
 - **Error contract post-fix**: C=90 — typed errors with recovery hints embedded in every response (was ~35 before fix).
-- **Dead code post-fix**: D=100 — 0-byte files removed (was ~55 before fix).
-- **Gap**: E=55 — Revit API has thousands of classes; 27 tools cover core operations only. The C# exec escape hatch compensates.
+- **Dead code post-fix**: D=90 — loader now asserts all expected tools register; demo tool removed. Was 100 but downgraded because prior loader was silently hiding failures.
+- **Gap**: E=55 — Revit API has thousands of classes; 29 tools cover core operations only. The C# exec escape hatch compensates.
 - **Gap**: F — no script templates or function registry. Agent needs Revit API knowledge or web search for C# patterns.
 - **Architecture**: TypeScript MCP server + C# Revit add-in (TCP socket bridge). Clean separation.
 - **Already standardized**: manifest.json, aioconnect.ts, envelope wrapping — all in place before this fix.
