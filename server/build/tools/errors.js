@@ -137,7 +137,7 @@ export const ERROR_HINTS = {
     connection: {
         description: "Revit connection unavailable",
         primary_action: "Check Revit is running with MCP plugin",
-        diagnostic_tool: "say_hello",
+        diagnostic_tool: "send_code_to_revit",
     },
     transaction: {
         description: "Revit transaction failed",

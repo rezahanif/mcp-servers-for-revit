@@ -19,8 +19,10 @@ export async function registerTools(server: McpServer) {
       license.ensureLicensed(); // per-call recheck (cheap HS256)
       const result = await cb(args, extra);
       if (result && Array.isArray(result.content)) {
-        result.content = result.content.map((c: any) =>
-          c.type === "text" ? { ...c, text: envelope(c.text) } : c
+        result.content = await Promise.all(
+          result.content.map(async (c: any) =>
+            c.type === "text" ? { ...c, text: await envelope(c.text) } : c
+          )
         );
       }
       return result;
@@ -33,23 +35,48 @@ export async function registerTools(server: McpServer) {
   // Excludes: errors.ts (typed errors), register.ts (this file), index.ts (barrel).
   const EXPECTED_TOOLS = [
     "ai_element_filter.ts",
+    "analyze_load_combinations.ts",
     "analyze_model_statistics.ts",
     "color_elements.ts",
+    "color_mep_by_system.ts",
+    "connect_mep_to_space.ts",
     "create_dimensions.ts",
+    "create_duct.ts",
+    "create_duct_system.ts",
+    "create_electrical_equipment.ts",
+    "create_electrical_panel.ts",
+    "create_electrical_system.ts",
+    "create_fire_protection.ts",
     "create_grid.ts",
+    "create_hvac_zone.ts",
     "create_level.ts",
     "create_line_based_element.ts",
+    "create_pipe.ts",
+    "create_pipe_system.ts",
+    "create_plumbing_fixture.ts",
     "create_point_based_element.ts",
+    "create_rebar.ts",
     "create_room.ts",
+    "create_structural_column.ts",
+    "create_structural_foundation.ts",
     "create_structural_framing_system.ts",
+    "create_structural_wall.ts",
+    "create_steel_connection.ts",
     "create_surface_based_element.ts",
+    "create_wire.ts",
     "delete_element.ts",
+    "export_mep_schedules.ts",
     "export_room_data.ts",
+    "get_analytical_model.ts",
     "get_available_family_types.ts",
+    "get_circuit_load.ts",
     "get_current_view_elements.ts",
     "get_current_view_info.ts",
     "get_material_quantities.ts",
+    "get_mep_elements.ts",
+    "get_mep_quantities.ts",
     "get_selected_elements.ts",
+    "get_structural_quantities.ts",
     "list_revit_api_categories.ts",
     "operate_element.ts",
     "query_revit_registry.ts",
@@ -57,17 +84,22 @@ export async function registerTools(server: McpServer) {
     "revit_templates.ts",
     "search_revit_api.ts",
     "send_code_to_revit.ts",
+    "set_mep_offsets.ts",
+    "set_mep_sizes.ts",
+    "set_structural_material.ts",
     "store_project_data.ts",
     "store_room_data.ts",
     "tag_all_rooms.ts",
     "tag_all_walls.ts",
+    "tag_mep_elements.ts",
+    "tag_structural_elements.ts",
   ];
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const files = fs.readdirSync(__dirname);
 
-  const KNOWN_NON_TOOLS = new Set(["errors.ts", "register.ts", "index.ts"]);
+  const KNOWN_NON_TOOLS = new Set(["errors.ts", "register.ts", "index.ts", "errors.js", "register.js", "index.js"]);
 
   const toolFiles = files.filter(
     (file) =>
