@@ -4,17 +4,36 @@ This document defines how each AiConnect MCP connector covers its host applicati
 
 ---
 
-## Current API Data (from static scans)
+## API Data Completeness
 
-| Connector | API Source | API Size | Scan Method | Complete? |
-|---|---|---|---|---|
-| abaqus | abqpy SWIG stubs | **1,194 classes** | Perl wrapper scan on Windows | ✅ Yes |
-| sap2000 | SAP2000 OAPI registry | **241 verified methods** | Manual verification + API docs | ⚠️ Partial (full OAPI ~500-1000+) |
-| ansys-cfx | Base class + catalog | **20 defined, 10 exposed** | Code analysis | ⚠️ Partial (full CFX API larger) |
-| qgis | PyQGIS SDK | **~300 ops** (estimated) | Partial SDK scan | ⚠️ Partial |
-| discovery-studio | Perl wrapper scan | **143 functions** | Static scan of install dir | ✅ Yes |
-| revit | SDK docs + registry | **3000+ classes** (indexed ~200) | SDK + revitapidocs.com | ⚠️ Partial (index covers ~7%) |
-| office | MS docs + COM reflection | **3000+ methods** (indexed ~54) | Learn.microsoft.com (manual) | ⚠️ Partial |
+### ✅ Complete (scanned from install)
+
+| Connector | API Size | Source | Method |
+|---|---|---|---|
+| **abaqus** | 1,194 classes | abqpy SWIG stubs | Perl wrapper scan on Windows — full ground truth |
+| **discovery-studio** | 143 functions | Perl wrapper scan | Static scan of install dir + 5564 HTML doc pages |
+
+### ⚠️ Partial (only what we documented/verified)
+
+| Connector | Have | Missing | How to complete |
+|---|---|---|---|
+| **sap2000** | 241 verified methods (registry.json) | Full OAPI — 334K lines of API docs suggest 500-1000+ total methods | Reflect on `SAP2000.tlb` COM type library on Windows |
+| **ansys-cfx** | 20 tools in base class, 18 catalog entries | Full CFX API method list | Reflect on `ansys-cfx-core` Python package |
+| **qgis** | Partial PyQGIS docs scan (~300 estimated) | Complete PyQGIS class/method enumeration | Scan `pyqgis-apidocs` or QGIS Python console `help()` |
+| **revit** | ~200 classes indexed (30 namespaces from SDK docs) | Full Revit API — 3,000+ classes total | Reflect on `RevitAPI.dll` + `RevitAPIUI.dll` on Windows |
+| **office** | 10 API doc files (learn.microsoft.com) | Full COM type libraries — 3,000+ methods | Reflect on Office `.tlb` type library files via COM on Windows |
+
+### Scan approach reference
+
+The abaqus and discovery-studio scans succeeded because:
+- **abqpy stubs** are Python files with `class` declarations — parseable with regex
+- **Perl wrappers** are `.pm`/`.pl` files with `sub` declarations — parseable with regex
+- Both are **text-based** — no need to instantiate the host app
+
+For the 5 partial connectors, the scan approach depends on the host's type system:
+- **COM type libraries** (sap2000, office): Use `comtypes.client` or `win32com.client` to enumerate type library contents on Windows
+- **.NET assemblies** (revit): Use `System.Reflection` or `dotnet-ildasm` to enumerate types
+- **Python packages** (cfx, qgis): Use `inspect` module or AST parsing on installed package files
 
 ---
 
@@ -42,7 +61,7 @@ Generic code execution covering 100% of the API:
 
 ## Per-Connector Coverage
 
-### 1. abaqus-mcp — 1,194 classes
+### 1. abaqus-mcp — 1,194 classes ✅ COMPLETE
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -55,7 +74,7 @@ Generic code execution covering 100% of the API:
 
 ---
 
-### 2. sap2000-mcp — 241+ methods
+### 2. sap2000-mcp — 241+ methods ⚠️ PARTIAL
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -64,11 +83,11 @@ Generic code execution covering 100% of the API:
 | Layer C | 1 | `execute_sap_function` — any OAPI method via COM dot-path |
 
 **Workflow:** Agent searches API docs → calls `execute_sap_function("SapModel.FrameObj.AddByCoord", args)` → COM dispatch.
-**API coverage: 100%** (exec hatch covers full OAPI, 241 verified + unknown total)
+**API coverage: 100%** (exec hatch covers full OAPI, 241 verified but full API likely 500-1000+)
 
 ---
 
-### 3. ansys-cfx-mcp — 20 defined, 10 exposed
+### 3. ansys-cfx-mcp — 20 defined, 10 exposed ⚠️ PARTIAL
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -81,7 +100,7 @@ Generic code execution covering 100% of the API:
 
 ---
 
-### 4. qgis-mcp — ~300 operations
+### 4. qgis-mcp — ~300 operations ⚠️ PARTIAL
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -94,7 +113,7 @@ Generic code execution covering 100% of the API:
 
 ---
 
-### 5. discovery-studio-mcp — 143 functions
+### 5. discovery-studio-mcp — 143 functions ✅ COMPLETE
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -107,7 +126,7 @@ Generic code execution covering 100% of the API:
 
 ---
 
-### 6. revit-mcp — 3,000+ classes
+### 6. revit-mcp — 3,000+ classes ⚠️ PARTIAL
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -120,7 +139,7 @@ Generic code execution covering 100% of the API:
 
 ---
 
-### 7. office-mcp — 3,000+ methods
+### 7. office-mcp — 3,000+ methods ⚠️ PARTIAL
 
 | Layer | Tools | What they cover |
 |---|---|---|
@@ -135,15 +154,15 @@ Generic code execution covering 100% of the API:
 
 ## Coverage Summary
 
-| Connector | API Size | Dedicated | Exec Hatch | Effective Coverage |
-|---|---|---|---|---|
-| abaqus | 1,194 | 6 (0.5%) | ✅ run_python | **100%** |
-| sap2000 | 241+ | 12 (5%) | ✅ execute_sap_function | **100%** |
-| ansys-cfx | 20 | 10 (50%) | ✅ run_code | **100%** |
-| qgis | ~300 | 124 (41%) | ✅ execute_code | **100%** |
-| revit | 3,000+ | 29 (<1%) | ✅ send_code_to_revit | **100%** |
-| discovery-studio | 143 | 15 (10%) | ❌ None | **10%** |
-| office | 3,000+ | 54 (1.8%) | ❌ None | **1.8%** |
+| Connector | API Size | Complete? | Dedicated | Exec Hatch | Effective Coverage |
+|---|---|---|---|---|---|
+| abaqus | 1,194 | ✅ | 6 (0.5%) | ✅ run_python | **100%** |
+| sap2000 | 241+ | ⚠️ | 12 (5%) | ✅ execute_sap_function | **100%** |
+| ansys-cfx | 20 | ⚠️ | 10 (50%) | ✅ run_code | **100%** |
+| qgis | ~300 | ⚠️ | 124 (41%) | ✅ execute_code | **100%** |
+| revit | 3,000+ | ⚠️ | 29 (<1%) | ✅ send_code_to_revit | **100%** |
+| discovery-studio | 143 | ✅ | 15 (10%) | ❌ None | **10%** |
+| office | 3,000+ | ⚠️ | 54 (1.8%) | ❌ None | **1.8%** |
 
 ---
 
@@ -159,8 +178,6 @@ The E dimension measures **dedicated tool count** — but real capability comes 
 | revit | 70 | Everything (3,000+ classes via exec) |
 | office | 65 | Very little (54 tools, no exec) |
 | discovery-studio | 65 | Little (15 tools, no exec) |
-
-**Office has the highest dedicated tool count (54) among non-exec connectors but the lowest effective coverage.** Revit has the lowest dedicated count (29) but 100% effective coverage.
 
 ---
 
