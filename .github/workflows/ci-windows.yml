@@ -7,6 +7,46 @@ on:
     branches: [main]
 
 jobs:
+  # The C# command set had NO build gate anywhere in this repo, which is how 69
+  # MCP tools shipped whose Revit-side commands did not exist. The TypeScript and
+  # C# halves have no compile-time relationship, so each needs its own gate:
+  # this job compiles the plugin + command set, and tests/tool_tiers.test.mjs
+  # asserts every advertised tool has a handler here.
+  build-commandset:
+    runs-on: windows-latest
+    steps:
+      - name: Check out connector repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      # Revit assemblies come from the Nice3point.Revit.* NuGet packages, so this
+      # builds without Revit installed.
+      - name: Restore
+        run: nuget restore mcp-servers-for-revit.sln
+        continue-on-error: true
+
+      - name: Build command set + plugin
+        run: msbuild mcp-servers-for-revit.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+  tool-tier-invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Asserts no tier-1 tool depends on a Revit command that does not exist,
+      # and that every tier-2 tool stays discoverable in the function registry.
+      - name: Tool tier invariants
+        run: node --test tests/tool_tiers.test.mjs
+
   validate-and-package:
     runs-on: windows-latest
     steps:

@@ -887,9 +887,8 @@
       "kind": "Tool",
       "description": "Write parameter values to Revit elements",
       "category": "parameter",
-      "verification_status": "unimplemented",
-      "tier": 2,
-      "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
+      "verification_status": "seeded",
+      "tier": 1
     },
     {
       "path": "create_phase",

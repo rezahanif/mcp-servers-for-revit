@@ -89,6 +89,34 @@ test("tier-2 tools are all discoverable in the function registry", () => {
   assert.deepEqual(mislabelled, [], `tier-2 registry entries not marked unimplemented: ${mislabelled.join(", ")}`);
 });
 
+/** Commands the plugin is configured to load (RevitCommandRegistry reads this). */
+function registeredCommands() {
+  const cfg = JSON.parse(readFileSync(join(ROOT, "command.json"), "utf-8"));
+  return new Set(cfg.commands.map((c) => c.commandName));
+}
+
+test("no tier-1 tool depends on a command the plugin never loads", () => {
+  // A handler class that exists in commandset/ but is absent from command.json
+  // is still a dead tool: the registry only loads what this file lists, so the
+  // call fails at dispatch exactly as if the class were never written.
+  const tools = declaredTools();
+  const registered = registeredCommands();
+  const unloaded = [...tier1]
+    .map((n) => [n, tools.get(n)])
+    .filter(([, cmd]) => cmd !== null && !registered.has(cmd))
+    .map(([n, cmd]) => `${n} -> ${cmd}`);
+  assert.deepEqual(unloaded, [], "tier-1 tools whose command is not in command.json:\n  " + unloaded.join("\n  "));
+});
+
+test("every implemented command is registered in command.json", () => {
+  // The inverse gap: a handler written and compiled but never wired up. Cheap to
+  // catch here, invisible until someone calls the tool.
+  const impl = implementedCommands();
+  const registered = registeredCommands();
+  const orphans = [...impl].filter((c) => !registered.has(c) && c !== "say_hello");
+  assert.deepEqual(orphans, [], `implemented but unregistered commands: ${orphans.join(", ")}`);
+});
+
 test("the discovery + escape-hatch tools are always tier-1", () => {
   // The safety argument for hiding tools is that the model can always find and
   // execute what is hidden. That argument fails the moment one of these drops
