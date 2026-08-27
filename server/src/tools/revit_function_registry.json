@@ -1,6 +1,6 @@
 {
   "source": "revit-mcp tool definitions + commandset C# commands",
-  "total_entries": 77,
+  "total_entries": 104,
   "entries": [
     {"path": "create_room", "kind": "Tool", "description": "Create rooms at specified locations with names, numbers, and properties", "category": "creation", "verification_status": "seeded"},
     {"path": "create_level", "kind": "Tool", "description": "Create levels at specified elevations with automatic floor plan views", "category": "creation", "verification_status": "seeded"},
@@ -78,6 +78,33 @@
     {"path": "get_structural_quantities", "kind": "Tool", "description": "Extract structural member quantities and takeoffs", "category": "structural", "verification_status": "seeded"},
     {"path": "create_steel_connection", "kind": "Tool", "description": "Create steel connections between structural members", "category": "structural", "verification_status": "seeded"},
     {"path": "analyze_load_combinations", "kind": "Tool", "description": "Analyze load combinations and factors", "category": "structural", "verification_status": "seeded"},
-    {"path": "tag_structural_elements", "kind": "Tool", "description": "Tag structural elements with member info", "category": "structural", "verification_status": "seeded"}
+    {"path": "tag_structural_elements", "kind": "Tool", "description": "Tag structural elements with member info", "category": "structural", "verification_status": "seeded"},
+    {"path": "create_schedule", "kind": "Tool", "description": "Create a new schedule/view in Revit for a specific category", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "get_schedule_fields", "kind": "Tool", "description": "List all fields in an existing Revit schedule", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "add_schedule_field", "kind": "Tool", "description": "Add fields to a Revit schedule", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "set_schedule_filter", "kind": "Tool", "description": "Apply filters to restrict schedule rows by field values", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "sort_schedule", "kind": "Tool", "description": "Set sort and grouping criteria for a schedule", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "export_schedule_csv", "kind": "Tool", "description": "Export a single schedule to CSV format", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "get_schedule_data", "kind": "Tool", "description": "Read cell data from a Revit schedule as structured table", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "modify_schedule_cell", "kind": "Tool", "description": "Edit cell values in a Revit schedule", "category": "scheduling", "verification_status": "seeded"},
+    {"path": "export_dwg", "kind": "Tool", "description": "Export a view/sheet to DWG format", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "import_dwg", "kind": "Tool", "description": "Import a DWG file into Revit", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "export_ifc", "kind": "Tool", "description": "Export model to IFC format (IFC2x3/IFC4)", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "import_ifc", "kind": "Tool", "description": "Import an IFC file into Revit", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "export_dfx", "kind": "Tool", "description": "Export a view/sheet to DXF format", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "export_schedules", "kind": "Tool", "description": "Export all schedules to Excel or CSV", "category": "interoperability", "verification_status": "seeded"},
+    {"path": "load_family", "kind": "Tool", "description": "Load an .rfa family file into the project", "category": "family", "verification_status": "seeded"},
+    {"path": "get_family_types", "kind": "Tool", "description": "List all loaded family types filtered by name/category", "category": "family", "verification_status": "seeded"},
+    {"path": "create_family_type", "kind": "Tool", "description": "Create a new family type by duplicating an existing one", "category": "family", "verification_status": "seeded"},
+    {"path": "modify_family_type", "kind": "Tool", "description": "Edit parameter values of an existing family type", "category": "family", "verification_status": "seeded"},
+    {"path": "place_family_instance", "kind": "Tool", "description": "Place family instances at specified locations", "category": "family", "verification_status": "seeded"},
+    {"path": "get_family_parameters", "kind": "Tool", "description": "List all parameters available for a family type", "category": "family", "verification_status": "seeded"},
+    {"path": "set_family_parameter", "kind": "Tool", "description": "Set parameter values on family instances or types", "category": "family", "verification_status": "seeded"},
+    {"path": "unload_family", "kind": "Tool", "description": "Unload a family from the current project", "category": "family", "verification_status": "seeded"},
+    {"path": "create_shared_parameter", "kind": "Tool", "description": "Create a shared parameter definition in the shared parameter file", "category": "parameter", "verification_status": "seeded"},
+    {"path": "create_project_parameter", "kind": "Tool", "description": "Create a project parameter bound to categories", "category": "parameter", "verification_status": "seeded"},
+    {"path": "bind_parameter", "kind": "Tool", "description": "Bind a parameter to one or more categories", "category": "parameter", "verification_status": "seeded"},
+    {"path": "get_parameter_value", "kind": "Tool", "description": "Read parameter values from Revit elements", "category": "parameter", "verification_status": "seeded"},
+    {"path": "set_parameter_value", "kind": "Tool", "description": "Write parameter values to Revit elements", "category": "parameter", "verification_status": "seeded"}
   ]
 }
