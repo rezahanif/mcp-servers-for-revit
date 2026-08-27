@@ -13,12 +13,13 @@
     "scripts": {
         "clean": "rimraf build",
         "prebuild": "npm run clean",
-        "build": "tsc",
+        "build": "tsc && node scripts/copy-assets.mjs",
         "prepublishOnly": "npm run build"
     },
     "files": [
         "build",
-        "README.md"
+        "README.md",
+        "scripts"
     ],
     "repository": {
         "type": "git",

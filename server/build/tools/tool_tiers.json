@@ -1,0 +1,315 @@
+{
+  "_why": "Which tools are registered as typed MCP tools (tier1) and which are reachable only through the tier-2 discovery layer (search_revit_api / query_revit_registry / send_code_to_revit). Tier-1 tools cost tool-surface tokens in EVERY session before any work happens; tier-2 entries cost zero, because the corpus lives in revit_function_registry.json, not in a tool schema.",
+  "_tier2_criterion": "A tool is tier-2 if the Revit-side command it sends has no C# handler in commandset/. Registering such a tool advertises a capability that cannot execute: it spends context, competes for the model's tool choice, and fails at the bridge. All 69 tier-2 entries below are already described in revit_function_registry.json with verification_status 'unimplemented', so the model can still discover them and fall back to send_code_to_revit.",
+  "_promotion_rule": "Move a name from tier2 to tier1 in the same change that adds its C# command handler to commandset/ and its entry to command.json. tests/tool_tiers.test.mjs enforces the invariant, so a promotion without a handler fails the suite.",
+  "tier1": [
+    "ai_element_filter",
+    "analyze_model_statistics",
+    "color_elements",
+    "create_dimensions",
+    "create_grid",
+    "create_level",
+    "create_line_based_element",
+    "create_point_based_element",
+    "create_room",
+    "create_structural_framing_system",
+    "create_surface_based_element",
+    "delete_element",
+    "export_room_data",
+    "get_available_family_types",
+    "get_current_view_elements",
+    "get_current_view_info",
+    "get_material_quantities",
+    "get_selected_elements",
+    "list_revit_api_categories",
+    "list_revit_templates",
+    "load_revit_template",
+    "operate_element",
+    "query_revit_registry",
+    "query_stored_data",
+    "search_revit_api",
+    "send_code_to_revit",
+    "store_project_data",
+    "store_room_data",
+    "tag_all_rooms",
+    "tag_all_walls"
+  ],
+  "tier2": {
+    "add_schedule_field": {
+      "command": "add_schedule_field",
+      "reason": "no_revit_command_handler"
+    },
+    "analyze_load_combinations": {
+      "command": "analyze_load_combinations",
+      "reason": "no_revit_command_handler"
+    },
+    "apply_view_template": {
+      "command": "apply_view_template",
+      "reason": "no_revit_command_handler"
+    },
+    "bind_parameter": {
+      "command": "bind_parameter",
+      "reason": "no_revit_command_handler"
+    },
+    "color_mep_by_system": {
+      "command": "color_mep_by_system",
+      "reason": "no_revit_command_handler"
+    },
+    "connect_mep_to_space": {
+      "command": "connect_mep_to_space",
+      "reason": "no_revit_command_handler"
+    },
+    "create_duct": {
+      "command": "create_duct",
+      "reason": "no_revit_command_handler"
+    },
+    "create_duct_system": {
+      "command": "create_duct_system",
+      "reason": "no_revit_command_handler"
+    },
+    "create_electrical_equipment": {
+      "command": "create_electrical_equipment",
+      "reason": "no_revit_command_handler"
+    },
+    "create_electrical_panel": {
+      "command": "create_electrical_panel",
+      "reason": "no_revit_command_handler"
+    },
+    "create_electrical_system": {
+      "command": "create_electrical_system",
+      "reason": "no_revit_command_handler"
+    },
+    "create_family_type": {
+      "command": "create_family_type",
+      "reason": "no_revit_command_handler"
+    },
+    "create_fire_protection": {
+      "command": "create_fire_protection",
+      "reason": "no_revit_command_handler"
+    },
+    "create_hvac_zone": {
+      "command": "create_hvac_zone",
+      "reason": "no_revit_command_handler"
+    },
+    "create_phase": {
+      "command": "create_phase",
+      "reason": "no_revit_command_handler"
+    },
+    "create_pipe": {
+      "command": "create_pipe",
+      "reason": "no_revit_command_handler"
+    },
+    "create_pipe_system": {
+      "command": "create_pipe_system",
+      "reason": "no_revit_command_handler"
+    },
+    "create_plumbing_fixture": {
+      "command": "create_plumbing_fixture",
+      "reason": "no_revit_command_handler"
+    },
+    "create_project_parameter": {
+      "command": "create_project_parameter",
+      "reason": "no_revit_command_handler"
+    },
+    "create_rebar": {
+      "command": "create_rebar",
+      "reason": "no_revit_command_handler"
+    },
+    "create_schedule": {
+      "command": "create_schedule",
+      "reason": "no_revit_command_handler"
+    },
+    "create_shared_parameter": {
+      "command": "create_shared_parameter",
+      "reason": "no_revit_command_handler"
+    },
+    "create_steel_connection": {
+      "command": "create_steel_connection",
+      "reason": "no_revit_command_handler"
+    },
+    "create_structural_column": {
+      "command": "create_structural_column",
+      "reason": "no_revit_command_handler"
+    },
+    "create_structural_foundation": {
+      "command": "create_structural_foundation",
+      "reason": "no_revit_command_handler"
+    },
+    "create_structural_wall": {
+      "command": "create_structural_wall",
+      "reason": "no_revit_command_handler"
+    },
+    "create_view_template": {
+      "command": "create_view_template",
+      "reason": "no_revit_command_handler"
+    },
+    "create_wire": {
+      "command": "create_wire",
+      "reason": "no_revit_command_handler"
+    },
+    "create_workset": {
+      "command": "create_workset",
+      "reason": "no_revit_command_handler"
+    },
+    "delete_view_template": {
+      "command": "delete_view_template",
+      "reason": "no_revit_command_handler"
+    },
+    "export_dfx": {
+      "command": "export_dfx",
+      "reason": "no_revit_command_handler"
+    },
+    "export_dwg": {
+      "command": "export_dwg",
+      "reason": "no_revit_command_handler"
+    },
+    "export_ifc": {
+      "command": "export_ifc",
+      "reason": "no_revit_command_handler"
+    },
+    "export_mep_schedules": {
+      "command": "export_mep_schedules",
+      "reason": "no_revit_command_handler"
+    },
+    "export_schedule_csv": {
+      "command": "export_schedule_csv",
+      "reason": "no_revit_command_handler"
+    },
+    "export_schedules": {
+      "command": "export_schedules",
+      "reason": "no_revit_command_handler"
+    },
+    "get_analytical_model": {
+      "command": "get_analytical_model",
+      "reason": "no_revit_command_handler"
+    },
+    "get_circuit_load": {
+      "command": "get_circuit_load",
+      "reason": "no_revit_command_handler"
+    },
+    "get_family_parameters": {
+      "command": "get_family_parameters",
+      "reason": "no_revit_command_handler"
+    },
+    "get_family_types": {
+      "command": "get_family_types",
+      "reason": "no_revit_command_handler"
+    },
+    "get_mep_elements": {
+      "command": "get_mep_elements",
+      "reason": "no_revit_command_handler"
+    },
+    "get_mep_quantities": {
+      "command": "get_mep_quantities",
+      "reason": "no_revit_command_handler"
+    },
+    "get_parameter_value": {
+      "command": "get_parameter_value",
+      "reason": "no_revit_command_handler"
+    },
+    "get_phase_filter": {
+      "command": "get_phase_filter",
+      "reason": "no_revit_command_handler"
+    },
+    "get_phases": {
+      "command": "get_phases",
+      "reason": "no_revit_command_handler"
+    },
+    "get_schedule_data": {
+      "command": "get_schedule_data",
+      "reason": "no_revit_command_handler"
+    },
+    "get_schedule_fields": {
+      "command": "get_schedule_fields",
+      "reason": "no_revit_command_handler"
+    },
+    "get_structural_quantities": {
+      "command": "get_structural_quantities",
+      "reason": "no_revit_command_handler"
+    },
+    "get_view_templates": {
+      "command": "get_view_templates",
+      "reason": "no_revit_command_handler"
+    },
+    "get_worksets": {
+      "command": "get_worksets",
+      "reason": "no_revit_command_handler"
+    },
+    "import_dwg": {
+      "command": "import_dwg",
+      "reason": "no_revit_command_handler"
+    },
+    "import_ifc": {
+      "command": "import_ifc",
+      "reason": "no_revit_command_handler"
+    },
+    "load_family": {
+      "command": "load_family",
+      "reason": "no_revit_command_handler"
+    },
+    "modify_family_type": {
+      "command": "modify_family_type",
+      "reason": "no_revit_command_handler"
+    },
+    "modify_schedule_cell": {
+      "command": "modify_schedule_cell",
+      "reason": "no_revit_command_handler"
+    },
+    "place_family_instance": {
+      "command": "place_family_instance",
+      "reason": "no_revit_command_handler"
+    },
+    "set_element_phase": {
+      "command": "set_element_phase",
+      "reason": "no_revit_command_handler"
+    },
+    "set_element_workset": {
+      "command": "set_element_workset",
+      "reason": "no_revit_command_handler"
+    },
+    "set_family_parameter": {
+      "command": "set_family_parameter",
+      "reason": "no_revit_command_handler"
+    },
+    "set_mep_offsets": {
+      "command": "set_mep_offsets",
+      "reason": "no_revit_command_handler"
+    },
+    "set_mep_sizes": {
+      "command": "set_mep_sizes",
+      "reason": "no_revit_command_handler"
+    },
+    "set_parameter_value": {
+      "command": "set_parameter_value",
+      "reason": "no_revit_command_handler"
+    },
+    "set_phase_visibility": {
+      "command": "set_phase_visibility",
+      "reason": "no_revit_command_handler"
+    },
+    "set_schedule_filter": {
+      "command": "set_schedule_filter",
+      "reason": "no_revit_command_handler"
+    },
+    "set_structural_material": {
+      "command": "set_structural_material",
+      "reason": "no_revit_command_handler"
+    },
+    "sort_schedule": {
+      "command": "sort_schedule",
+      "reason": "no_revit_command_handler"
+    },
+    "tag_mep_elements": {
+      "command": "tag_mep_elements",
+      "reason": "no_revit_command_handler"
+    },
+    "tag_structural_elements": {
+      "command": "tag_structural_elements",
+      "reason": "no_revit_command_handler"
+    },
+    "unload_family": {
+      "command": "unload_family",
+      "reason": "no_revit_command_handler"
+    }
+  }
+}

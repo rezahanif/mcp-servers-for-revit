@@ -58,6 +58,12 @@ export async function ensureLicensed(): Promise<any> {
 
 /** Wrap a tool's text content through the response envelope. */
 export async function envelope(text: string): Promise<string> {
+  // Gate-aware, matching this module's stated contract ("standalone/upstream
+  // runs stay plain"). Without this check the SDK import ran even when
+  // AICONNECT_ENABLE != 1, so every tool response outside the gateway failed
+  // with "Cannot find module .../sdk/node/index.js" — including the pure-local
+  // discovery tools that need neither Revit nor the SDK.
+  if (process.env.AICONNECT_ENABLE !== "1") return text;
   const mod = await sdk();
   return mod.envelopeText(text);
 }

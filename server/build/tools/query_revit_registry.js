@@ -12,7 +12,7 @@ function loadRegistry() {
     return _registry;
 }
 export function registerQueryRevitRegistryTool(server) {
-    server.tool("query_revit_registry", "Query the Revit function registry — 49 verified entries (27 MCP tools + 22 C# API calls). Search by keyword or filter by category to find ready-to-use functions.", {
+    server.tool("query_revit_registry", "Query the Revit function registry — the tier-2 index of every known Revit capability, including ones with no typed tool. Each entry carries verification_status: 'seeded' means a typed MCP tool exists and you can call it by name; 'unimplemented' means there is no Revit-side handler, so drive it with send_code_to_revit instead. Search by keyword or filter by category/kind.", {
         query: z
             .string()
             .optional()
@@ -50,7 +50,7 @@ export function registerQueryRevitRegistryTool(server) {
                             entries: entries.slice(0, 20),
                             hint: entries.length > 20
                                 ? `Showing 20 of ${entries.length}. Narrow with query/category/kind.`
-                                : `Found ${entries.length} entries. Use send_code_to_revit for C# entries.`,
+                                : `Found ${entries.length} entries. Entries marked verification_status:'unimplemented' have no typed tool and no Revit command handler — reach them with send_code_to_revit, do not call them by name.`,
                         }, null, 2),
                     },
                 ],

@@ -6,14 +6,40 @@ export async function registerTools(server) {
     // AiConnect: startup license gate — the server refuses to register any
     // tool (and therefore to serve) without a valid MCP_LICENSE_TOKEN.
     const license = await ensureLicensed();
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const tiers = JSON.parse(fs.readFileSync(path.join(__dirname, "tool_tiers.json"), "utf-8"));
+    const TIER1 = new Set(tiers.tier1);
+    const TIER2 = new Set(Object.keys(tiers.tier2));
+    const registeredNames = [];
+    const suppressed = [];
     // AiConnect: wrap EVERY tool's handler — per-call license recheck + response
-    // envelope. Generic monkey-patch of server.tool, so the 24 tool files need
-    // zero edits (Phase 5 contract: structured envelope everywhere).
+    // envelope. Generic monkey-patch of server.tool, so the tool files need zero
+    // edits. This is also where tiering is enforced, for the same reason: it is
+    // the one place every tool registration passes through, so a tool file cannot
+    // opt out of the manifest by accident.
     const origTool = server.tool.bind(server);
     server.tool = (name, desc, schema, handler) => {
+        if (TIER2.has(name)) {
+            suppressed.push(name);
+            return;
+        }
+        if (!TIER1.has(name)) {
+            // Fail loud rather than silently advertising an unclassified tool. A new
+            // tool file must declare its tier, which forces the author to answer
+            // "does this have a working Revit command handler?" before it can cost
+            // anyone context.
+            throw new Error(`Tool "${name}" appears in neither tier1 nor tier2 of tool_tiers.json. ` +
+                `Add it to tier1 if commandset/ implements its command, otherwise tier2.`);
+        }
+        registeredNames.push(name);
         const cb = handler ?? schema;
         const wrapped = async (args, extra) => {
-            license.ensureLicensed(); // per-call recheck (cheap HS256)
+            // Optional chain, not a bare call: ensureLicensed() returns null when
+            // AICONNECT_ENABLE != 1 (the documented standalone/upstream mode), so an
+            // unconditional call threw "Cannot read properties of null" on EVERY tool
+            // call outside the gateway — including pure-local discovery tools.
+            license?.ensureLicensed(); // per-call recheck (cheap HS256)
             const result = await cb(args, extra);
             if (result && Array.isArray(result.content)) {
                 result.content = await Promise.all(result.content.map(async (c) => c.type === "text" ? { ...c, text: await envelope(c.text) } : c));
@@ -24,61 +50,40 @@ export async function registerTools(server) {
             return origTool(name, desc, schema, wrapped);
         return origTool(name, schema, wrapped);
     };
-    // All expected tool files — keep in sync with actual .ts files in this directory.
-    // Excludes: errors.ts (typed errors), register.ts (this file), index.ts (barrel).
-    const EXPECTED_TOOLS = [
-        "ai_element_filter.ts",
-        "analyze_model_statistics.ts",
-        "color_elements.ts",
-        "create_dimensions.ts",
-        "create_grid.ts",
-        "create_level.ts",
-        "create_line_based_element.ts",
-        "create_point_based_element.ts",
-        "create_room.ts",
-        "create_structural_framing_system.ts",
-        "create_surface_based_element.ts",
-        "delete_element.ts",
-        "export_room_data.ts",
-        "get_available_family_types.ts",
-        "get_current_view_elements.ts",
-        "get_current_view_info.ts",
-        "get_material_quantities.ts",
-        "get_selected_elements.ts",
-        "list_revit_api_categories.ts",
-        "operate_element.ts",
-        "query_revit_registry.ts",
-        "query_stored_data.ts",
-        "revit_templates.ts",
-        "search_revit_api.ts",
-        "send_code_to_revit.ts",
-        "store_project_data.ts",
-        "store_room_data.ts",
-        "tag_all_rooms.ts",
-        "tag_all_walls.ts",
-    ];
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
     const files = fs.readdirSync(__dirname);
-    const KNOWN_NON_TOOLS = new Set(["errors.ts", "register.ts", "index.ts", "errors.js", "register.js", "index.js"]);
+    const KNOWN_NON_TOOLS = new Set([
+        "errors.ts", "register.ts", "index.ts",
+        "errors.js", "register.js", "index.js",
+    ]);
     const toolFiles = files.filter((file) => (file.endsWith(".ts") || file.endsWith(".js")) &&
         !KNOWN_NON_TOOLS.has(file));
-    let registered = 0;
     for (const file of toolFiles) {
         const importPath = `./${file.replace(/\.(ts|js)$/, ".js")}`;
         const module = await import(importPath);
-        const registerFunctionName = Object.keys(module).find((key) => key.startsWith("register") && typeof module[key] === "function");
-        if (registerFunctionName) {
-            module[registerFunctionName](server);
-            registered++;
-            console.error(`Registered tool: ${file}`);
+        // ALL register* exports, not just the first. revit_templates.ts exports two
+        // (registerListRevitTemplatesTool + registerLoadRevitTemplateTool); the old
+        // `.find()` called only one, so load_revit_template silently never reached
+        // the tool surface. Same silent-skip family as the 0-byte-file bug — a file
+        // present and importable is not proof its tools registered.
+        const registerFunctionNames = Object.keys(module).filter((key) => key.startsWith("register") && typeof module[key] === "function");
+        if (registerFunctionNames.length > 0) {
+            for (const fn of registerFunctionNames)
+                module[fn](server);
         }
         else {
             console.warn(`Warning: no register function in ${file}`);
         }
     }
-    if (registered < EXPECTED_TOOLS.length) {
-        const missing = EXPECTED_TOOLS.filter((t) => !toolFiles.some((f) => f.replace(/\.(ts|js)$/, ".js") === t.replace(/\.ts$/, ".js")));
-        throw new Error(`Tool registration incomplete: expected ${EXPECTED_TOOLS.length}, got ${registered}. Missing: ${missing.join(", ")}`);
+    // The loader assertion that caught the 0-byte-file bug, now keyed to the
+    // manifest instead of a hand-synced filename list: a tool file that fails to
+    // load, or is deleted, shows up here as a missing tier-1 name.
+    if (registeredNames.length !== TIER1.size) {
+        const got = new Set(registeredNames);
+        const missing = tiers.tier1.filter((t) => !got.has(t));
+        throw new Error(`Tool registration incomplete: expected ${TIER1.size} tier-1 tools, got ` +
+            `${registeredNames.length}. Missing: ${missing.join(", ")}`);
     }
+    console.error(`Registered ${registeredNames.length} tier-1 tools; ` +
+        `${suppressed.length} tier-2 tools withheld from the tool surface ` +
+        `(discoverable via search_revit_api, executable via send_code_to_revit).`);
 }

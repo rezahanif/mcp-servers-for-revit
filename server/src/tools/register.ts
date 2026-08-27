@@ -4,19 +4,67 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ensureLicensed, envelope } from "../aioconnect.js";
 
+/**
+ * Tool tiering — see tool_tiers.json for the full rationale.
+ *
+ * Only tier-1 tools are registered as typed MCP tools. Tier-2 tools stay in the
+ * source tree and in revit_function_registry.json, but are NOT advertised on the
+ * wire: their Revit-side command has no C# handler, so registering them would
+ * spend tool-surface tokens in every session to advertise a capability that
+ * fails at the bridge. They remain reachable through search_revit_api /
+ * query_revit_registry and executable through send_code_to_revit.
+ */
+type ToolTiers = {
+  tier1: string[];
+  tier2: Record<string, { command: string | null; reason: string }>;
+};
+
 export async function registerTools(server: McpServer) {
   // AiConnect: startup license gate — the server refuses to register any
   // tool (and therefore to serve) without a valid MCP_LICENSE_TOKEN.
   const license = await ensureLicensed();
 
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  const tiers: ToolTiers = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "tool_tiers.json"), "utf-8")
+  );
+  const TIER1 = new Set(tiers.tier1);
+  const TIER2 = new Set(Object.keys(tiers.tier2));
+
+  const registeredNames: string[] = [];
+  const suppressed: string[] = [];
+
   // AiConnect: wrap EVERY tool's handler — per-call license recheck + response
-  // envelope. Generic monkey-patch of server.tool, so the 24 tool files need
-  // zero edits (Phase 5 contract: structured envelope everywhere).
+  // envelope. Generic monkey-patch of server.tool, so the tool files need zero
+  // edits. This is also where tiering is enforced, for the same reason: it is
+  // the one place every tool registration passes through, so a tool file cannot
+  // opt out of the manifest by accident.
   const origTool = (server as any).tool.bind(server);
   (server as any).tool = (name: string, desc: string, schema: any, handler?: any) => {
+    if (TIER2.has(name)) {
+      suppressed.push(name);
+      return;
+    }
+    if (!TIER1.has(name)) {
+      // Fail loud rather than silently advertising an unclassified tool. A new
+      // tool file must declare its tier, which forces the author to answer
+      // "does this have a working Revit command handler?" before it can cost
+      // anyone context.
+      throw new Error(
+        `Tool "${name}" appears in neither tier1 nor tier2 of tool_tiers.json. ` +
+          `Add it to tier1 if commandset/ implements its command, otherwise tier2.`
+      );
+    }
+    registeredNames.push(name);
     const cb = handler ?? schema;
     const wrapped = async (args: any, extra: any) => {
-      license.ensureLicensed(); // per-call recheck (cheap HS256)
+      // Optional chain, not a bare call: ensureLicensed() returns null when
+      // AICONNECT_ENABLE != 1 (the documented standalone/upstream mode), so an
+      // unconditional call threw "Cannot read properties of null" on EVERY tool
+      // call outside the gateway — including pure-local discovery tools.
+      license?.ensureLicensed(); // per-call recheck (cheap HS256)
       const result = await cb(args, extra);
       if (result && Array.isArray(result.content)) {
         result.content = await Promise.all(
@@ -31,114 +79,12 @@ export async function registerTools(server: McpServer) {
     return origTool(name, schema, wrapped);
   };
 
-  // All expected tool files — keep in sync with actual .ts files in this directory.
-  // Excludes: errors.ts (typed errors), register.ts (this file), index.ts (barrel).
-  const EXPECTED_TOOLS = [
-    "ai_element_filter.ts",
-    "add_schedule_field.ts",
-    "analyze_load_combinations.ts",
-    "analyze_model_statistics.ts",
-    "apply_view_template.ts",
-    "bind_parameter.ts",
-    "color_elements.ts",
-    "color_mep_by_system.ts",
-    "connect_mep_to_space.ts",
-    "create_dimensions.ts",
-    "create_duct.ts",
-    "create_duct_system.ts",
-    "create_electrical_equipment.ts",
-    "create_electrical_panel.ts",
-    "create_electrical_system.ts",
-    "create_family_type.ts",
-    "create_fire_protection.ts",
-    "create_grid.ts",
-    "create_hvac_zone.ts",
-    "create_level.ts",
-    "create_line_based_element.ts",
-    "create_phase.ts",
-    "create_pipe.ts",
-    "create_pipe_system.ts",
-    "create_plumbing_fixture.ts",
-    "create_point_based_element.ts",
-    "create_project_parameter.ts",
-    "create_rebar.ts",
-    "create_room.ts",
-    "create_schedule.ts",
-    "create_shared_parameter.ts",
-    "create_structural_column.ts",
-    "create_structural_foundation.ts",
-    "create_structural_framing_system.ts",
-    "create_structural_wall.ts",
-    "create_steel_connection.ts",
-    "create_surface_based_element.ts",
-    "create_view_template.ts",
-    "create_wire.ts",
-    "create_workset.ts",
-    "delete_element.ts",
-    "delete_view_template.ts",
-    "export_dwg.ts",
-    "export_dfx.ts",
-    "export_ifc.ts",
-    "export_mep_schedules.ts",
-    "export_room_data.ts",
-    "export_schedule_csv.ts",
-    "export_schedules.ts",
-    "get_analytical_model.ts",
-    "get_available_family_types.ts",
-    "get_circuit_load.ts",
-    "get_current_view_elements.ts",
-    "get_current_view_info.ts",
-    "get_family_parameters.ts",
-    "get_family_types.ts",
-    "get_material_quantities.ts",
-    "get_mep_elements.ts",
-    "get_mep_quantities.ts",
-    "get_parameter_value.ts",
-    "get_phase_filter.ts",
-    "get_phases.ts",
-    "get_schedule_data.ts",
-    "get_schedule_fields.ts",
-    "get_selected_elements.ts",
-    "get_structural_quantities.ts",
-    "get_view_templates.ts",
-    "get_worksets.ts",
-    "import_dwg.ts",
-    "import_ifc.ts",
-    "list_revit_api_categories.ts",
-    "load_family.ts",
-    "modify_family_type.ts",
-    "modify_schedule_cell.ts",
-    "operate_element.ts",
-    "place_family_instance.ts",
-    "query_revit_registry.ts",
-    "query_stored_data.ts",
-    "revit_templates.ts",
-    "search_revit_api.ts",
-    "send_code_to_revit.ts",
-    "set_element_phase.ts",
-    "set_element_workset.ts",
-    "set_family_parameter.ts",
-    "set_mep_offsets.ts",
-    "set_mep_sizes.ts",
-    "set_parameter_value.ts",
-    "set_phase_visibility.ts",
-    "set_schedule_filter.ts",
-    "set_structural_material.ts",
-    "sort_schedule.ts",
-    "store_project_data.ts",
-    "store_room_data.ts",
-    "tag_all_rooms.ts",
-    "tag_all_walls.ts",
-    "tag_mep_elements.ts",
-    "tag_structural_elements.ts",
-    "unload_family.ts",
-  ];
-
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
   const files = fs.readdirSync(__dirname);
 
-  const KNOWN_NON_TOOLS = new Set(["errors.ts", "register.ts", "index.ts", "errors.js", "register.js", "index.js"]);
+  const KNOWN_NON_TOOLS = new Set([
+    "errors.ts", "register.ts", "index.ts",
+    "errors.js", "register.js", "index.js",
+  ]);
 
   const toolFiles = files.filter(
     (file) =>
@@ -146,30 +92,41 @@ export async function registerTools(server: McpServer) {
       !KNOWN_NON_TOOLS.has(file)
   );
 
-  let registered = 0;
   for (const file of toolFiles) {
     const importPath = `./${file.replace(/\.(ts|js)$/, ".js")}`;
     const module = await import(importPath);
 
-    const registerFunctionName = Object.keys(module).find(
+    // ALL register* exports, not just the first. revit_templates.ts exports two
+    // (registerListRevitTemplatesTool + registerLoadRevitTemplateTool); the old
+    // `.find()` called only one, so load_revit_template silently never reached
+    // the tool surface. Same silent-skip family as the 0-byte-file bug — a file
+    // present and importable is not proof its tools registered.
+    const registerFunctionNames = Object.keys(module).filter(
       (key) => key.startsWith("register") && typeof module[key] === "function"
     );
 
-    if (registerFunctionName) {
-      module[registerFunctionName](server);
-      registered++;
-      console.error(`Registered tool: ${file}`);
+    if (registerFunctionNames.length > 0) {
+      for (const fn of registerFunctionNames) module[fn](server);
     } else {
       console.warn(`Warning: no register function in ${file}`);
     }
   }
 
-  if (registered < EXPECTED_TOOLS.length) {
-    const missing = EXPECTED_TOOLS.filter(
-      (t) => !toolFiles.some((f) => f.replace(/\.(ts|js)$/, ".js") === t.replace(/\.ts$/, ".js"))
-    );
+  // The loader assertion that caught the 0-byte-file bug, now keyed to the
+  // manifest instead of a hand-synced filename list: a tool file that fails to
+  // load, or is deleted, shows up here as a missing tier-1 name.
+  if (registeredNames.length !== TIER1.size) {
+    const got = new Set(registeredNames);
+    const missing = tiers.tier1.filter((t) => !got.has(t));
     throw new Error(
-      `Tool registration incomplete: expected ${EXPECTED_TOOLS.length}, got ${registered}. Missing: ${missing.join(", ")}`
+      `Tool registration incomplete: expected ${TIER1.size} tier-1 tools, got ` +
+        `${registeredNames.length}. Missing: ${missing.join(", ")}`
     );
   }
+
+  console.error(
+    `Registered ${registeredNames.length} tier-1 tools; ` +
+      `${suppressed.length} tier-2 tools withheld from the tool surface ` +
+      `(discoverable via search_revit_api, executable via send_code_to_revit).`
+  );
 }
