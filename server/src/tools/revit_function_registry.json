@@ -1,6 +1,6 @@
 {
   "source": "revit-mcp tool definitions + commandset C# commands",
-  "total_entries": 104,
+  "total_entries": 120,
   "entries": [
     {"path": "create_room", "kind": "Tool", "description": "Create rooms at specified locations with names, numbers, and properties", "category": "creation", "verification_status": "seeded"},
     {"path": "create_level", "kind": "Tool", "description": "Create levels at specified elevations with automatic floor plan views", "category": "creation", "verification_status": "seeded"},
@@ -105,6 +105,22 @@
     {"path": "create_project_parameter", "kind": "Tool", "description": "Create a project parameter bound to categories", "category": "parameter", "verification_status": "seeded"},
     {"path": "bind_parameter", "kind": "Tool", "description": "Bind a parameter to one or more categories", "category": "parameter", "verification_status": "seeded"},
     {"path": "get_parameter_value", "kind": "Tool", "description": "Read parameter values from Revit elements", "category": "parameter", "verification_status": "seeded"},
-    {"path": "set_parameter_value", "kind": "Tool", "description": "Write parameter values to Revit elements", "category": "parameter", "verification_status": "seeded"}
+    {"path": "set_parameter_value", "kind": "Tool", "description": "Write parameter values to Revit elements", "category": "parameter", "verification_status": "seeded"},
+    {"path": "create_phase", "kind": "Tool", "description": "Create a new project phase (e.g., Existing, New Construction, Demolished)", "category": "phasing", "verification_status": "seeded"},
+    {"path": "get_phases", "kind": "Tool", "description": "List all project phases with names, IDs, and numbers", "category": "phasing", "verification_status": "seeded"},
+    {"path": "set_element_phase", "kind": "Tool", "description": "Assign created and demolished phases to elements", "category": "phasing", "verification_status": "seeded"},
+    {"path": "get_phase_filter", "kind": "Tool", "description": "Get phase filter settings for a view", "category": "phasing", "verification_status": "seeded"},
+    {"path": "set_phase_visibility", "kind": "Tool", "description": "Control phase visibility in views (show new, existing, demolished, temporary)", "category": "phasing", "verification_status": "seeded"},
+    {"path": "create_view_template", "kind": "Tool", "description": "Create a view template from an existing view's display settings", "category": "view_template", "verification_status": "seeded"},
+    {"path": "apply_view_template", "kind": "Tool", "description": "Apply a view template to one or more views", "category": "view_template", "verification_status": "seeded"},
+    {"path": "get_view_templates", "kind": "Tool", "description": "List all view templates with names, IDs, and applied views", "category": "view_template", "verification_status": "seeded"},
+    {"path": "delete_view_template", "kind": "Tool", "description": "Delete view templates from the project", "category": "view_template", "verification_status": "seeded"},
+    {"path": "create_workset", "kind": "Tool", "description": "Create a new workset for worksharing collaboration", "category": "workset", "verification_status": "seeded"},
+    {"path": "get_worksets", "kind": "Tool", "description": "List all worksets with names, owners, and open status", "category": "workset", "verification_status": "seeded"},
+    {"path": "set_element_workset", "kind": "Tool", "description": "Assign elements to a workset for worksharing", "category": "workset", "verification_status": "seeded"},
+    {"path": "Phase.Create", "kind": "CSharp", "description": "Create project phase via Revit API", "category": "phasing", "namespace": "Autodesk.Revit.DB", "verification_status": "seeded"},
+    {"path": "PhaseFilterElement", "kind": "CSharp", "description": "Phase filter element for view phase visibility", "category": "phasing", "namespace": "Autodesk.Revit.DB", "verification_status": "seeded"},
+    {"path": "View.ViewTemplateId", "kind": "CSharp", "description": "Get or set view template assignment on a view", "category": "view_template", "namespace": "Autodesk.Revit.DB", "verification_status": "seeded"},
+    {"path": "Workset.Create", "kind": "CSharp", "description": "Create workset via Document", "category": "workset", "namespace": "Autodesk.Revit.DB", "verification_status": "seeded"}
   ]
 }
