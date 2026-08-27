@@ -102,8 +102,40 @@ namespace revit_mcp_plugin.Core
             try
             {
                 _isRunning = true;
-                _listener = new TcpListener(IPAddress.Any, _port);
+
+                // SECURITY: loopback only, never IPAddress.Any.
+                //
+                // This socket accepts unauthenticated commands and can execute
+                // arbitrary C# inside Revit (send_code_to_revit). Bound to
+                // IPAddress.Any it put that on every interface, reachable by
+                // anyone who could route to the port — and it stayed reachable
+                // whether or not the AiConnect connector was enabled, because
+                // this listener lives in Revit, not in the connector process.
+                // Every gateway-side lifecycle gate (entitlement, activation
+                // lease, artifact integrity, disable) was therefore bypassable
+                // by talking to this port directly.
+                //
+                // Loopback does not make it authenticated — a same-user local
+                // process can still reach it — but it removes the network from
+                // the threat model, which is the difference between "local
+                // privilege" and "remote code execution in the CAD host".
+                // Mirrors the qgis-mcp plugin, which already refuses a
+                // non-loopback bind without an explicit token.
+                //
+                // Override deliberately, never by accident: REVIT_MCP_BIND_ANY=1
+                // restores the old behaviour for someone who genuinely needs a
+                // remote bind and has secured the network path themselves.
+                var bindAny = string.Equals(
+                    Environment.GetEnvironmentVariable("REVIT_MCP_BIND_ANY"),
+                    "1", StringComparison.Ordinal);
+                var bindAddress = bindAny ? IPAddress.Any : IPAddress.Loopback;
+                if (bindAny)
+                {
+                    _logger?.Info("REVIT_MCP_BIND_ANY=1 — binding all interfaces; this exposes unauthenticated code execution to the network.");
+                }
+                _listener = new TcpListener(bindAddress, _port);
                 _listener.Start();
+                _logger?.Info($"Socket service listening on {bindAddress}:{_port}");
 
                 _listenerThread = new Thread(ListenForClients)
                 {
