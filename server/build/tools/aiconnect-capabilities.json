@@ -1,0 +1,345 @@
+{
+ "exec_tool": "send_code_to_revit",
+ "capabilities": [
+  {
+   "name": "add_schedule_field",
+   "description": "Add fields to a Revit schedule",
+   "category": "scheduling"
+  },
+  {
+   "name": "analyze_load_combinations",
+   "description": "Analyze load combinations and factors",
+   "category": "structural"
+  },
+  {
+   "name": "apply_view_template",
+   "description": "Apply a view template to one or more views",
+   "category": "view_template"
+  },
+  {
+   "name": "bind_parameter",
+   "description": "Bind a parameter to one or more categories",
+   "category": "parameter"
+  },
+  {
+   "name": "color_mep_by_system",
+   "description": "Color MEP elements by system type for visual differentiation",
+   "category": "mep"
+  },
+  {
+   "name": "connect_mep_to_space",
+   "description": "Connect MEP elements to rooms/spaces for calculations",
+   "category": "mep"
+  },
+  {
+   "name": "create_duct",
+   "description": "Create duct segments with fittings for HVAC systems",
+   "category": "mep"
+  },
+  {
+   "name": "create_duct_system",
+   "description": "Create HVAC duct systems with system type classification",
+   "category": "mep"
+  },
+  {
+   "name": "create_electrical_equipment",
+   "description": "Place electrical equipment families (panels, transformers)",
+   "category": "mep"
+  },
+  {
+   "name": "create_electrical_panel",
+   "description": "Place electrical panelboards/distribution panels",
+   "category": "mep"
+  },
+  {
+   "name": "create_electrical_system",
+   "description": "Create electrical circuits/systems on panels",
+   "category": "mep"
+  },
+  {
+   "name": "create_family_type",
+   "description": "Create a new family type by duplicating an existing one",
+   "category": "family"
+  },
+  {
+   "name": "create_fire_protection",
+   "description": "Create fire protection piping (sprinkler, standpipe)",
+   "category": "mep"
+  },
+  {
+   "name": "create_hvac_zone",
+   "description": "Create HVAC zoning by grouping spaces",
+   "category": "mep"
+  },
+  {
+   "name": "create_phase",
+   "description": "Create a new project phase (e.g., Existing, New Construction, Demolished)",
+   "category": "phasing"
+  },
+  {
+   "name": "create_pipe",
+   "description": "Create pipe segments with fittings for piping systems",
+   "category": "mep"
+  },
+  {
+   "name": "create_pipe_system",
+   "description": "Create piping systems (domestic, sanitary, hydronic)",
+   "category": "mep"
+  },
+  {
+   "name": "create_plumbing_fixture",
+   "description": "Place plumbing fixture families (sinks, toilets)",
+   "category": "mep"
+  },
+  {
+   "name": "create_project_parameter",
+   "description": "Create a project parameter bound to categories",
+   "category": "parameter"
+  },
+  {
+   "name": "create_rebar",
+   "description": "Place reinforcement bars on structural elements",
+   "category": "structural"
+  },
+  {
+   "name": "create_schedule",
+   "description": "Create a new schedule/view in Revit for a specific category",
+   "category": "scheduling"
+  },
+  {
+   "name": "create_shared_parameter",
+   "description": "Create a shared parameter definition in the shared parameter file",
+   "category": "parameter"
+  },
+  {
+   "name": "create_steel_connection",
+   "description": "Create steel connections between structural members",
+   "category": "structural"
+  },
+  {
+   "name": "create_structural_column",
+   "description": "Place structural columns with level constraints",
+   "category": "structural"
+  },
+  {
+   "name": "create_structural_foundation",
+   "description": "Place structural foundations (isolated, strip)",
+   "category": "structural"
+  },
+  {
+   "name": "create_structural_wall",
+   "description": "Create structural walls with type and constraints",
+   "category": "structural"
+  },
+  {
+   "name": "create_view_template",
+   "description": "Create a view template from an existing view's display settings",
+   "category": "view_template"
+  },
+  {
+   "name": "create_wire",
+   "description": "Draw wire connections between electrical equipment",
+   "category": "mep"
+  },
+  {
+   "name": "create_workset",
+   "description": "Create a new workset for worksharing collaboration",
+   "category": "workset"
+  },
+  {
+   "name": "delete_view_template",
+   "description": "Delete view templates from the project",
+   "category": "view_template"
+  },
+  {
+   "name": "export_dfx",
+   "description": "Export a view/sheet to DXF format",
+   "category": "interoperability"
+  },
+  {
+   "name": "export_dwg",
+   "description": "Export a view/sheet to DWG format",
+   "category": "interoperability"
+  },
+  {
+   "name": "export_ifc",
+   "description": "Export model to IFC format (IFC2x3/IFC4)",
+   "category": "interoperability"
+  },
+  {
+   "name": "export_mep_schedules",
+   "description": "Export MEP data to Revit schedules",
+   "category": "mep"
+  },
+  {
+   "name": "export_schedule_csv",
+   "description": "Export a single schedule to CSV format",
+   "category": "scheduling"
+  },
+  {
+   "name": "export_schedules",
+   "description": "Export all schedules to Excel or CSV",
+   "category": "interoperability"
+  },
+  {
+   "name": "get_analytical_model",
+   "description": "Query analytical model forces and member properties",
+   "category": "structural"
+  },
+  {
+   "name": "get_circuit_load",
+   "description": "Calculate electrical circuit load information",
+   "category": "mep"
+  },
+  {
+   "name": "get_family_parameters",
+   "description": "List all parameters available for a family type",
+   "category": "family"
+  },
+  {
+   "name": "get_family_types",
+   "description": "List all loaded family types filtered by name/category",
+   "category": "family"
+  },
+  {
+   "name": "get_mep_elements",
+   "description": "Query MEP elements filtered by system type/category",
+   "category": "mep"
+  },
+  {
+   "name": "get_mep_quantities",
+   "description": "Extract MEP material quantities and takeoffs",
+   "category": "mep"
+  },
+  {
+   "name": "get_parameter_value",
+   "description": "Read parameter values from Revit elements",
+   "category": "parameter"
+  },
+  {
+   "name": "get_phase_filter",
+   "description": "Get phase filter settings for a view",
+   "category": "phasing"
+  },
+  {
+   "name": "get_phases",
+   "description": "List all project phases with names, IDs, and numbers",
+   "category": "phasing"
+  },
+  {
+   "name": "get_schedule_data",
+   "description": "Read cell data from a Revit schedule as structured table",
+   "category": "scheduling"
+  },
+  {
+   "name": "get_schedule_fields",
+   "description": "List all fields in an existing Revit schedule",
+   "category": "scheduling"
+  },
+  {
+   "name": "get_structural_quantities",
+   "description": "Extract structural member quantities and takeoffs",
+   "category": "structural"
+  },
+  {
+   "name": "get_view_templates",
+   "description": "List all view templates with names, IDs, and applied views",
+   "category": "view_template"
+  },
+  {
+   "name": "get_worksets",
+   "description": "List all worksets with names, owners, and open status",
+   "category": "workset"
+  },
+  {
+   "name": "import_dwg",
+   "description": "Import a DWG file into Revit",
+   "category": "interoperability"
+  },
+  {
+   "name": "import_ifc",
+   "description": "Import an IFC file into Revit",
+   "category": "interoperability"
+  },
+  {
+   "name": "load_family",
+   "description": "Load an .rfa family file into the project",
+   "category": "family"
+  },
+  {
+   "name": "modify_family_type",
+   "description": "Edit parameter values of an existing family type",
+   "category": "family"
+  },
+  {
+   "name": "modify_schedule_cell",
+   "description": "Edit cell values in a Revit schedule",
+   "category": "scheduling"
+  },
+  {
+   "name": "place_family_instance",
+   "description": "Place family instances at specified locations",
+   "category": "family"
+  },
+  {
+   "name": "set_element_phase",
+   "description": "Assign created and demolished phases to elements",
+   "category": "phasing"
+  },
+  {
+   "name": "set_element_workset",
+   "description": "Assign elements to a workset for worksharing",
+   "category": "workset"
+  },
+  {
+   "name": "set_family_parameter",
+   "description": "Set parameter values on family instances or types",
+   "category": "family"
+  },
+  {
+   "name": "set_mep_offsets",
+   "description": "Set vertical offsets for MEP elements",
+   "category": "mep"
+  },
+  {
+   "name": "set_mep_sizes",
+   "description": "Set duct/pipe sizes and insulation properties",
+   "category": "mep"
+  },
+  {
+   "name": "set_phase_visibility",
+   "description": "Control phase visibility in views (show new, existing, demolished, temporary)",
+   "category": "phasing"
+  },
+  {
+   "name": "set_schedule_filter",
+   "description": "Apply filters to restrict schedule rows by field values",
+   "category": "scheduling"
+  },
+  {
+   "name": "set_structural_material",
+   "description": "Assign structural materials to elements",
+   "category": "structural"
+  },
+  {
+   "name": "sort_schedule",
+   "description": "Set sort and grouping criteria for a schedule",
+   "category": "scheduling"
+  },
+  {
+   "name": "tag_mep_elements",
+   "description": "Tag MEP elements with size/system parameters",
+   "category": "mep"
+  },
+  {
+   "name": "tag_structural_elements",
+   "description": "Tag structural elements with member info",
+   "category": "structural"
+  },
+  {
+   "name": "unload_family",
+   "description": "Unload a family from the current project",
+   "category": "family"
+  }
+ ]
+}

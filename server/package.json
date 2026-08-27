@@ -13,7 +13,7 @@
     "scripts": {
         "clean": "rimraf build",
         "prebuild": "npm run clean",
-        "build": "tsc && node scripts/copy-assets.mjs",
+        "build": "tsc && node scripts/copy-assets.mjs && node scripts/gen-capabilities.mjs",
         "prepublishOnly": "npm run build"
     },
     "files": [

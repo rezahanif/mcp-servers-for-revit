@@ -28,6 +28,10 @@
       "2025"
     ]
   },
+  "tool_index": {
+    "exec_tool": "send_code_to_revit",
+    "capabilities_file": "server/build/tools/aiconnect-capabilities.json"
+  },
   "config": {
     "env": []
   }

@@ -6,7 +6,7 @@ import { RevitError, ConnectionError } from "./errors.js";
 export function registerSetParameterValueTool(server: McpServer) {
   server.tool(
     "set_parameter_value",
-    "Write parameter values to one or more Revit elements. Supports both instance and type parameters with unit conversion.",
+    "Set parameter values on existing Revit elements, for instance or type parameters, with unit conversion. Use this to correct or update a property after an element already exists.",
     {
       data: z.array(
         z.object({

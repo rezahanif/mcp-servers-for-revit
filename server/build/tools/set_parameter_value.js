@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 import { RevitError, ConnectionError } from "./errors.js";
 export function registerSetParameterValueTool(server) {
-    server.tool("set_parameter_value", "Write parameter values to one or more Revit elements. Supports both instance and type parameters with unit conversion.", {
+    server.tool("set_parameter_value", "Set parameter values on existing Revit elements, for instance or type parameters, with unit conversion. Use this to correct or update a property after an element already exists.", {
         data: z.array(z.object({
             elementId: z.number().describe("ElementId of the target element"),
             parameters: z.array(z.object({
