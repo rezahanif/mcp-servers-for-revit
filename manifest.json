@@ -34,5 +34,34 @@
   },
   "config": {
     "env": []
+  },
+  "package": {
+    "include": [
+      "server/build"
+    ],
+    "exclude": []
+  },
+  "tool_tiers": {
+    "core": [
+      "search_revit_api",
+      "query_revit_registry",
+      "list_revit_api_categories",
+      "list_revit_templates",
+      "query_stored_data",
+      "send_code_to_revit",
+      "get_current_view_info",
+      "get_current_view_elements",
+      "get_selected_elements",
+      "get_available_family_types",
+      "get_material_quantities",
+      "create_point_based_element",
+      "create_line_based_element",
+      "create_surface_based_element",
+      "create_room",
+      "create_level",
+      "set_parameter_value",
+      "delete_element",
+      "operate_element"
+    ]
   }
 }
