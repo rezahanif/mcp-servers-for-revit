@@ -19,13 +19,14 @@
     "type": "revit-addin",
     "host_app": "Autodesk Revit",
     "install_target_template": "%APPDATA%/Autodesk/Revit/Addins/{revit_version}/",
-    "artifact": "RevitMCPPlugin.zip",
+    "artifact": "RevitMCPPlugin-{revit_version}.zip",
     "requires_host_restart": true,
     "socket_port_env_var": "REVIT_SOCKET_PORT",
     "supported_versions": [
       "2023",
       "2024",
-      "2025"
+      "2025",
+      "2026"
     ]
   },
   "tool_index": {
@@ -37,7 +38,11 @@
   },
   "package": {
     "include": [
-      "server/build"
+      "server/build",
+      "RevitMCPPlugin-2023.zip",
+      "RevitMCPPlugin-2024.zip",
+      "RevitMCPPlugin-2025.zip",
+      "RevitMCPPlugin-2026.zip"
     ],
     "exclude": []
   },

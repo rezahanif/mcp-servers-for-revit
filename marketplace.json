@@ -2,7 +2,14 @@
   "id": "revit-mcp",
   "name": "Autodesk Revit BIM & Modeling",
   "category": "BIM & Architecture",
-  "tags": ["revit", "bim", "architecture", "mcp", "autodesk", "structural"],
+  "tags": [
+    "revit",
+    "bim",
+    "architecture",
+    "mcp",
+    "autodesk",
+    "structural"
+  ],
   "author": {
     "name": "AiConnect Official",
     "url": "https://aiconnect.fun",
@@ -12,8 +19,7 @@
   "license": "MIT",
   "homepage": "https://github.com/rezahanif/mcp-servers-for-revit",
   "assets": {
-    "icon": "assets/logo.svg",
-    "banner": "assets/banner.png"
+    "icon": "assets/logo.svg"
   },
   "capabilities": [
     "Query Revit model elements and parameters",

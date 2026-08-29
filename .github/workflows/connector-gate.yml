@@ -1,0 +1,22 @@
+# Calls the shared AiConnect pre-release gate. Do NOT copy checks into this file:
+# seven divergent CI workflows is the same failure mode as seven divergent packagers.
+# The gate itself lives in rezahanif/AiConnect/.github/workflows/ci-connectors.yml.
+#
+# Requires an AICONNECTOR_TOKEN repo secret with read access to rezahanif/AiConnect.
+name: Connector gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  gate:
+    uses: rezahanif/AiConnect/.github/workflows/ci-connectors.yml@main
+    with:
+      # No pyproject.toml — this connector is TypeScript (server/) plus C# (commandset/),
+      # so there is no Python distribution for the clean-install check to build.
+      skip-install: true
+    secrets:
+      aiconnector-token: ${{ secrets.AICONNECTOR_TOKEN }}

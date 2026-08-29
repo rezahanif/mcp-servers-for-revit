@@ -3,3 +3,6 @@ revit-data.db
 __pycache__/
 *.pyc
 dist/
+
+# Built by scripts/build_plugin_zips.py from ~/project/revit-addin-releases/
+RevitMCPPlugin-*.zip
