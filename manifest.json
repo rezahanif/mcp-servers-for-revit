@@ -44,7 +44,10 @@
       "RevitMCPPlugin-2025.zip",
       "RevitMCPPlugin-2026.zip"
     ],
-    "exclude": []
+    "exclude": [],
+    "vendor": [
+      "server/node_modules"
+    ]
   },
   "tool_tiers": {
     "core": [
