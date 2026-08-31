@@ -340,6 +340,246 @@
    "name": "unload_family",
    "description": "Unload a family from the current project",
    "category": "family"
+  },
+  {
+   "name": "ai_element_filter",
+   "aliases": [
+    "which elements match a category",
+    "elements by parameter value",
+    "elements inside a bounding box"
+   ]
+  },
+  {
+   "name": "analyze_model_statistics",
+   "aliases": [
+    "how complex is this model",
+    "element counts by category",
+    "model health statistics"
+   ]
+  },
+  {
+   "name": "color_elements",
+   "aliases": [
+    "colour code elements by parameter",
+    "colour scheme across a category",
+    "visually differentiate elements by value"
+   ]
+  },
+  {
+   "name": "create_dimensions",
+   "aliases": [
+    "dimension strings between gridlines",
+    "annotate distances on the drawing"
+   ]
+  },
+  {
+   "name": "create_grid",
+   "aliases": [
+    "structural gridlines",
+    "column grid spacing",
+    "gridline layout"
+   ]
+  },
+  {
+   "name": "create_level",
+   "aliases": [
+    "storeys at elevations",
+    "floor levels",
+    "building storey heights"
+   ]
+  },
+  {
+   "name": "create_line_based_element",
+   "aliases": [
+    "draw walls",
+    "beams along a line",
+    "pipe runs between two points",
+    "linear elements"
+   ]
+  },
+  {
+   "name": "create_point_based_element",
+   "aliases": [
+    "door in a wall",
+    "windows into an elevation",
+    "furniture placement",
+    "hosted components"
+   ]
+  },
+  {
+   "name": "create_room",
+   "aliases": [
+    "define rooms",
+    "room objects in enclosed spaces",
+    "spaces on a storey"
+   ]
+  },
+  {
+   "name": "create_structural_framing_system",
+   "aliases": [
+    "beam layout over a bay",
+    "joist framing",
+    "structural framing grid"
+   ]
+  },
+  {
+   "name": "create_surface_based_element",
+   "aliases": [
+    "floors",
+    "roof slabs",
+    "ceiling surfaces",
+    "planar elements"
+   ]
+  },
+  {
+   "name": "delete_element",
+   "aliases": [
+    "remove elements from the model",
+    "erase objects by id"
+   ]
+  },
+  {
+   "name": "export_room_data",
+   "aliases": [
+    "room schedule export",
+    "extract room information to a file"
+   ]
+  },
+  {
+   "name": "get_available_family_types",
+   "aliases": [
+    "which family types are loaded",
+    "available wall types",
+    "loadable families"
+   ]
+  },
+  {
+   "name": "get_current_view_elements",
+   "aliases": [
+    "what is visible in this view",
+    "elements in the active view"
+   ]
+  },
+  {
+   "name": "get_current_view_info",
+   "aliases": [
+    "details of the active view",
+    "view scale and type",
+    "which view is open",
+    "current view properties"
+   ]
+  },
+  {
+   "name": "get_material_quantities",
+   "aliases": [
+    "material takeoff",
+    "bill of quantities",
+    "quantity schedule",
+    "volumes by material"
+   ]
+  },
+  {
+   "name": "get_selected_elements",
+   "aliases": [
+    "what is currently selected",
+    "the current selection"
+   ]
+  },
+  {
+   "name": "list_revit_api_categories",
+   "aliases": [
+    "browse API namespaces",
+    "which API areas exist"
+   ]
+  },
+  {
+   "name": "list_revit_templates",
+   "aliases": [
+    "available workflow guides",
+    "step by step BIM procedures"
+   ]
+  },
+  {
+   "name": "load_revit_template",
+   "aliases": [
+    "open a workflow guide",
+    "instructions for a BIM procedure"
+   ]
+  },
+  {
+   "name": "operate_element",
+   "aliases": [
+    "select elements",
+    "hide elements",
+    "isolate objects",
+    "element transparency"
+   ]
+  },
+  {
+   "name": "query_revit_registry",
+   "aliases": [
+    "look up a Revit capability",
+    "which API call covers this"
+   ]
+  },
+  {
+   "name": "query_stored_data",
+   "aliases": [
+    "read back stored project data",
+    "query the local database"
+   ]
+  },
+  {
+   "name": "search_revit_api",
+   "aliases": [
+    "find an API class by keyword",
+    "Revit API documentation lookup"
+   ]
+  },
+  {
+   "name": "send_code_to_revit",
+   "aliases": [
+    "run C# against the document",
+    "execute a script inside Revit"
+   ]
+  },
+  {
+   "name": "set_parameter_value",
+   "aliases": [
+    "change a parameter on an element",
+    "correct a fire rating",
+    "edit instance properties",
+    "modify type parameters"
+   ]
+  },
+  {
+   "name": "store_project_data",
+   "aliases": [
+    "save project metadata",
+    "record project information"
+   ]
+  },
+  {
+   "name": "store_room_data",
+   "aliases": [
+    "save room metadata",
+    "record room information"
+   ]
+  },
+  {
+   "name": "tag_all_rooms",
+   "aliases": [
+    "put labels on every enclosed space",
+    "annotate room names on the plan",
+    "room tags"
+   ]
+  },
+  {
+   "name": "tag_all_walls",
+   "aliases": [
+    "label walls in the view",
+    "wall tags"
+   ]
   }
  ]
 }

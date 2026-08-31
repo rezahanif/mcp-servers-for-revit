@@ -1,0 +1,154 @@
+{
+ "_doc": "Authored intent phrasings, merged into build/tools/aiconnect-capabilities.json by scripts/gen-capabilities.mjs. The AiConnect gateway folds these into its BM25 search haystack only - never into what the model is shown, and never into the embedding.",
+ "_why": "Measured on the 122-task revit benchmark: +8.8 pt recall@1 and +10.0 pt weighted coverage for ~4.6 KB, with negative controls held at 6/8. For comparison the entire semantic/ONNX stack buys +4.4 pt recall@1 and +1.9 pt weighted for ~104 MB of vendored runtime plus a ~130 MB model download. Driver: aiconnector/scripts/bundle-benchmark/alias_ab.py",
+ "_rule": "An alias must not introduce a word that is COMMON in ordinary English but RARE in the corpus. BM25 IDF treats such a word as maximally discriminating, so it becomes a magnet for queries the tool should refuse. Measured: the alias 'how much concrete is in the model' made 'Write me a haiku about concrete' match get_material_quantities at 3.05 and cost a negative control. Name the operation, not a material, a trade, or any everyday noun.",
+ "aliases": {
+  "ai_element_filter": [
+   "which elements match a category",
+   "elements by parameter value",
+   "elements inside a bounding box"
+  ],
+  "analyze_model_statistics": [
+   "how complex is this model",
+   "element counts by category",
+   "model health statistics"
+  ],
+  "color_elements": [
+   "colour code elements by parameter",
+   "colour scheme across a category",
+   "visually differentiate elements by value"
+  ],
+  "create_dimensions": [
+   "dimension strings between gridlines",
+   "annotate distances on the drawing"
+  ],
+  "create_grid": [
+   "structural gridlines",
+   "column grid spacing",
+   "gridline layout"
+  ],
+  "create_level": [
+   "storeys at elevations",
+   "floor levels",
+   "building storey heights"
+  ],
+  "create_line_based_element": [
+   "draw walls",
+   "beams along a line",
+   "pipe runs between two points",
+   "linear elements"
+  ],
+  "create_point_based_element": [
+   "door in a wall",
+   "windows into an elevation",
+   "furniture placement",
+   "hosted components"
+  ],
+  "create_room": [
+   "define rooms",
+   "room objects in enclosed spaces",
+   "spaces on a storey"
+  ],
+  "create_structural_framing_system": [
+   "beam layout over a bay",
+   "joist framing",
+   "structural framing grid"
+  ],
+  "create_surface_based_element": [
+   "floors",
+   "roof slabs",
+   "ceiling surfaces",
+   "planar elements"
+  ],
+  "delete_element": [
+   "remove elements from the model",
+   "erase objects by id"
+  ],
+  "export_room_data": [
+   "room schedule export",
+   "extract room information to a file"
+  ],
+  "get_available_family_types": [
+   "which family types are loaded",
+   "available wall types",
+   "loadable families"
+  ],
+  "get_current_view_elements": [
+   "what is visible in this view",
+   "elements in the active view"
+  ],
+  "get_current_view_info": [
+   "details of the active view",
+   "view scale and type",
+   "which view is open",
+   "current view properties"
+  ],
+  "get_material_quantities": [
+   "material takeoff",
+   "bill of quantities",
+   "quantity schedule",
+   "volumes by material"
+  ],
+  "get_selected_elements": [
+   "what is currently selected",
+   "the current selection"
+  ],
+  "list_revit_api_categories": [
+   "browse API namespaces",
+   "which API areas exist"
+  ],
+  "operate_element": [
+   "select elements",
+   "hide elements",
+   "isolate objects",
+   "element transparency"
+  ],
+  "query_revit_registry": [
+   "look up a Revit capability",
+   "which API call covers this"
+  ],
+  "query_stored_data": [
+   "read back stored project data",
+   "query the local database"
+  ],
+  "list_revit_templates": [
+   "available workflow guides",
+   "step by step BIM procedures"
+  ],
+  "load_revit_template": [
+   "open a workflow guide",
+   "instructions for a BIM procedure"
+  ],
+  "search_revit_api": [
+   "find an API class by keyword",
+   "Revit API documentation lookup"
+  ],
+  "send_code_to_revit": [
+   "run C# against the document",
+   "execute a script inside Revit"
+  ],
+  "set_parameter_value": [
+   "change a parameter on an element",
+   "correct a fire rating",
+   "edit instance properties",
+   "modify type parameters"
+  ],
+  "store_project_data": [
+   "save project metadata",
+   "record project information"
+  ],
+  "store_room_data": [
+   "save room metadata",
+   "record room information"
+  ],
+  "tag_all_rooms": [
+   "put labels on every enclosed space",
+   "annotate room names on the plan",
+   "room tags"
+  ],
+  "tag_all_walls": [
+   "label walls in the view",
+   "wall tags"
+  ]
+ }
+}
