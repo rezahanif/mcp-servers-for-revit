@@ -16,6 +16,7 @@
  * its stdout pristine for plain MCP.
  */
 import net from "net";
+import { getRevitSocketPort } from "./utils/portDiscovery.js";
 
 let lastState: string | null = null;
 let timer: NodeJS.Timeout | null = null;
@@ -31,7 +32,7 @@ function emit(state: string) {
 }
 
 function probe() {
-  const port = Number(process.env.REVIT_SOCKET_PORT ?? 8080);
+  const port = getRevitSocketPort();
   const sock = net.connect({ host: "127.0.0.1", port });
   const finish = (state: string) => {
     sock.destroy();

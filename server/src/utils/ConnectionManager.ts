@@ -1,4 +1,5 @@
 import { RevitClientConnection } from "./SocketClient.js";
+import { getRevitSocketPort } from "./portDiscovery.js";
 
 // Mutex to serialize all Revit connections - prevents race conditions
 // when multiple requests are made in parallel
@@ -20,7 +21,7 @@ export async function withRevitConnection<T>(
   });
   await previousMutex;
 
-  const revitClient = new RevitClientConnection("localhost", 8080);
+  const revitClient = new RevitClientConnection("localhost", getRevitSocketPort());
 
   try {
     // 连接到Revit客户端

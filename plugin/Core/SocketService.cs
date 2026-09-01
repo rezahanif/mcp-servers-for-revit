@@ -78,13 +78,16 @@ namespace revit_mcp_plugin.Core
             configManager.LoadConfiguration();
             
 
-            //// 从配置中读取服务端口
-            //// Read the service port from the configuration.
-            //if (configManager.Config.Settings.Port > 0)
-            //{
-            //    _port = configManager.Config.Settings.Port;
-            //}
-            _port = 8080; // 固定端口号 - Hard-wired port number.
+            // 从配置中读取服务端口（作为首选端口 —— 若被占用，Start() 会回退到系统分配的空闲端口）
+            // Read the preferred service port from the configuration. This is only
+            // a preference: if it's already taken by another process, Start()
+            // falls back to an OS-assigned free port rather than failing, so the
+            // user never has to open a terminal to find and kill whatever is
+            // squatting on it.
+            if (configManager.Config.Settings.Port > 0)
+            {
+                _port = configManager.Config.Settings.Port;
+            }
 
             // 加载命令
             // Load command.
@@ -133,8 +136,30 @@ namespace revit_mcp_plugin.Core
                 {
                     _logger?.Info("REVIT_MCP_BIND_ANY=1 — binding all interfaces; this exposes unauthenticated code execution to the network.");
                 }
-                _listener = new TcpListener(bindAddress, _port);
-                _listener.Start();
+
+                try
+                {
+                    _listener = new TcpListener(bindAddress, _port);
+                    _listener.Start();
+                }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                {
+                    // The preferred port is held by something else — a leftover
+                    // process, another app, a previous Revit session that hasn't
+                    // released it yet. Ask the OS for a free ephemeral port
+                    // instead of failing: the user is not IT staff and must never
+                    // need to open a terminal to find and kill whatever is
+                    // squatting on it.
+                    _logger?.Info($"Port {_port} is already in use; falling back to an OS-assigned port.");
+                    _listener = new TcpListener(bindAddress, 0);
+                    _listener.Start();
+                }
+
+                // Record whatever port we actually landed on — may differ from
+                // the preferred one above — and publish it so the Node connector
+                // can discover it without any port being hardcoded on that side.
+                _port = ((IPEndPoint)_listener.LocalEndpoint).Port;
+                PublishPort(_port);
                 _logger?.Info($"Socket service listening on {bindAddress}:{_port}");
 
                 _listenerThread = new Thread(ListenForClients)
@@ -146,6 +171,18 @@ namespace revit_mcp_plugin.Core
             catch (Exception)
             {
                 _isRunning = false;
+            }
+        }
+
+        private void PublishPort(int port)
+        {
+            try
+            {
+                File.WriteAllText(PathManager.GetPortFilePath(), port.ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger?.Info($"Could not write port-discovery file: {ex.Message}");
             }
         }
 

@@ -41,6 +41,21 @@ namespace revit_mcp_plugin.Utils
             return logsDirectory;
         }
         /// <summary>
+        /// Gets the path to the port-discovery file that SocketService publishes
+        /// its actual bound port to (it may differ from the configured/default
+        /// port if that one was already taken). The Node connector reads this
+        /// file to find the add-in without any hardcoded port or user action.
+        /// </summary>
+        public static string GetPortFilePath()
+        {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string dir = Path.Combine(localAppData, "aiconnect-revit-mcp");
+
+            EnsureDirectoryExists(dir);
+
+            return Path.Combine(dir, "port.txt");
+        }
+        /// <summary>
         /// Gets the path to the command registry file.
         /// If the file doesn't exist, creates it with default content.
         /// </summary>
