@@ -107,10 +107,6 @@
    "look up a Revit capability",
    "which API call covers this"
   ],
-  "query_stored_data": [
-   "read back stored project data",
-   "query the local database"
-  ],
   "list_revit_templates": [
    "available workflow guides",
    "step by step BIM procedures"
@@ -132,14 +128,6 @@
    "correct a fire rating",
    "edit instance properties",
    "modify type parameters"
-  ],
-  "store_project_data": [
-   "save project metadata",
-   "record project information"
-  ],
-  "store_room_data": [
-   "save room metadata",
-   "record room information"
   ],
   "tag_all_rooms": [
    "put labels on every enclosed space",

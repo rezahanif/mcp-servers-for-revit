@@ -55,7 +55,6 @@
       "query_revit_registry",
       "list_revit_api_categories",
       "list_revit_templates",
-      "query_stored_data",
       "send_code_to_revit",
       "get_current_view_info",
       "get_current_view_elements",

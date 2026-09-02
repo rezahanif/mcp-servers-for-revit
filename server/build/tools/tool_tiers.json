@@ -26,12 +26,9 @@
     "load_revit_template",
     "operate_element",
     "query_revit_registry",
-    "query_stored_data",
     "search_revit_api",
     "send_code_to_revit",
     "set_parameter_value",
-    "store_project_data",
-    "store_room_data",
     "tag_all_rooms",
     "tag_all_walls"
   ],
