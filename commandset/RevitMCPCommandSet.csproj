@@ -78,13 +78,19 @@
          runtime. Revit loads add-ins through its own AssemblyDependencyResolver rather than the
          shared framework, so that assumption doesn't hold and the assembly is reported missing
          at runtime unless copied next to the add-in explicitly. R20-R24 (net48) don't hit this:
-         there System.Collections.Immutable is an ordinary downloadable package, already copied. -->
+         there System.Collections.Immutable is an ordinary downloadable package, already copied.
+
+         Vendored under vendor/roslyn/ (not resolved from the build machine's own SDK/shared
+         framework) so a repackage from a different machine gets the exact same bytes this was
+         verified against, regardless of which .NET SDK is installed there. Includes
+         Microsoft.CodeAnalysis[.CSharp].dll too, even though CopyLocalLockFileAssemblies already
+         copies those from NuGet, for the same reason: one guaranteed source for all three. -->
     <Target Name="CopyFrameworkOnlyRoslynDeps" AfterTargets="Build" BeforeTargets="DeployCommandSet"
             Condition="$(RevitVersion) == '2025' Or $(RevitVersion) == '2026'">
         <ItemGroup>
-            <_RoslynFrameworkDeps Include="@(ReferencePath)" Condition="'%(Filename)' == 'System.Collections.Immutable'" />
+            <_RoslynVendoredDeps Include="$(ProjectDir)vendor\roslyn\*.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(_RoslynFrameworkDeps)" DestinationFolder="$(TargetDir)" Condition="'@(_RoslynFrameworkDeps)' != ''" />
+        <Copy SourceFiles="@(_RoslynVendoredDeps)" DestinationFolder="$(TargetDir)" />
     </Target>
 
     <Target Name="DeployCommandSet" AfterTargets="Build">
