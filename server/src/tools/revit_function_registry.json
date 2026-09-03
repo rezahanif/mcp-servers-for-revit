@@ -163,30 +163,6 @@
       "tier": 1
     },
     {
-      "path": "store_project_data",
-      "kind": "Tool",
-      "description": "Store project data for later retrieval",
-      "category": "data",
-      "verification_status": "seeded",
-      "tier": 1
-    },
-    {
-      "path": "store_room_data",
-      "kind": "Tool",
-      "description": "Store room data for later retrieval",
-      "category": "data",
-      "verification_status": "seeded",
-      "tier": 1
-    },
-    {
-      "path": "query_stored_data",
-      "kind": "Tool",
-      "description": "Query previously stored data",
-      "category": "data",
-      "verification_status": "seeded",
-      "tier": 1
-    },
-    {
       "path": "send_code_to_revit",
       "kind": "Tool",
       "description": "Execute C# code in Revit with full API access",

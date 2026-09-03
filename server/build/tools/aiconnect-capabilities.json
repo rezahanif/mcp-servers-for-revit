@@ -523,13 +523,6 @@
    ]
   },
   {
-   "name": "query_stored_data",
-   "aliases": [
-    "read back stored project data",
-    "query the local database"
-   ]
-  },
-  {
    "name": "search_revit_api",
    "aliases": [
     "find an API class by keyword",
@@ -550,20 +543,6 @@
     "correct a fire rating",
     "edit instance properties",
     "modify type parameters"
-   ]
-  },
-  {
-   "name": "store_project_data",
-   "aliases": [
-    "save project metadata",
-    "record project information"
-   ]
-  },
-  {
-   "name": "store_room_data",
-   "aliases": [
-    "save room metadata",
-    "record room information"
    ]
   },
   {
