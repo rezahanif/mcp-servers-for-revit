@@ -6,6 +6,12 @@
         <PlatformTarget>x64</PlatformTarget>
         <ImplicitUsings>true</ImplicitUsings>
         <PublishAddinFiles>true</PublishAddinFiles>
+        <!-- Revit loads each add-in via its own AssemblyDependencyResolver, not the
+             shared runtime, so transitive package deps the SDK treats as
+             framework-provided (System.Collections.Immutable, System.Reflection.Metadata,
+             etc. pulled in by Microsoft.CodeAnalysis.CSharp for send_code_to_revit) never
+             reach the host unless copied next to the add-in explicitly. -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <Configurations>Debug R20;Debug R21;Debug R22;Debug R23;Debug R24;Debug R25;Debug R26</Configurations>
         <Configurations>$(Configurations);Release R20;Release R21;Release R22;Release R23;Release R24;Release R25;Release R26</Configurations>
     </PropertyGroup>
@@ -64,6 +70,22 @@
     <ItemGroup>
       <Reference Include="System.Net.Http" />
     </ItemGroup>
+
+    <!-- On net8.0/net10.0 (R25/R26) System.Collections.Immutable is an in-box shared-framework
+         assembly: MSBuild resolves it for Microsoft.CodeAnalysis.CSharp (send_code_to_revit's
+         Roslyn dependency) but never copies it local, even with CopyLocalLockFileAssemblies,
+         because framework-provided references are assumed to always be present at the host's
+         runtime. Revit loads add-ins through its own AssemblyDependencyResolver rather than the
+         shared framework, so that assumption doesn't hold and the assembly is reported missing
+         at runtime unless copied next to the add-in explicitly. R20-R24 (net48) don't hit this:
+         there System.Collections.Immutable is an ordinary downloadable package, already copied. -->
+    <Target Name="CopyFrameworkOnlyRoslynDeps" AfterTargets="Build" BeforeTargets="DeployCommandSet"
+            Condition="$(RevitVersion) == '2025' Or $(RevitVersion) == '2026'">
+        <ItemGroup>
+            <_RoslynFrameworkDeps Include="@(ReferencePath)" Condition="'%(Filename)' == 'System.Collections.Immutable'" />
+        </ItemGroup>
+        <Copy SourceFiles="@(_RoslynFrameworkDeps)" DestinationFolder="$(TargetDir)" Condition="'@(_RoslynFrameworkDeps)' != ''" />
+    </Target>
 
     <Target Name="DeployCommandSet" AfterTargets="Build">
         <PropertyGroup>
