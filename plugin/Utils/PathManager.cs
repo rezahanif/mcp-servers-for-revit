@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.IO;
+﻿using System.IO;
 
 namespace revit_mcp_plugin.Utils
 {
@@ -42,10 +40,29 @@ namespace revit_mcp_plugin.Utils
         }
         /// <summary>
         /// Gets the path to the command registry file.
-        /// If the file doesn't exist, creates it with default content.
         /// </summary>
-        /// <param name="createIfNotExists">Whether to create a default file if it doesn't exist (default: true)</param>
+        /// <param name="createIfNotExists">
+        /// When true (default) and the file is missing, throws instead of
+        /// silently fabricating an empty one. See remarks.
+        /// </param>
         /// <returns>Path to the command registry file</returns>
+        /// <remarks>
+        /// This used to auto-create an empty <c>{"commands": []}</c> stub
+        /// whenever the real file was missing, and swallow any write
+        /// failure behind a bare <c>Console.WriteLine</c> that never reached
+        /// the plugin's actual log file. The shipped connector package
+        /// always includes a populated commandRegistry.json (24+ commands),
+        /// so a missing file means the package was not extracted/installed
+        /// correctly — never a legitimate "fresh install, zero commands"
+        /// state. Silently substituting an empty registry made every
+        /// Revit-API-backed MCP tool fail with "Method 'X' not found" while
+        /// the log's own "Command loading complete" line reported success,
+        /// which cost a full investigation to diagnose (AiConnect gateway
+        /// repo, docs/audit/BUG-LOG.md, N57). Throwing here instead routes
+        /// through `MCPServiceConnection.Execute`'s existing catch block,
+        /// which already surfaces `ex.Message` to the user as a Revit
+        /// dialog — no new plumbing needed, just no longer hiding it.
+        /// </remarks>
         public static string GetCommandRegistryFilePath(bool createIfNotExists = true)
         {
             string commandsDirectory = GetCommandsDirectoryPath();
@@ -53,28 +70,15 @@ namespace revit_mcp_plugin.Utils
 
             if (createIfNotExists && !File.Exists(registryFilePath))
             {
-                CreateDefaultCommandRegistryFile(registryFilePath);
+                throw new FileNotFoundException(
+                    $"commandRegistry.json is missing at '{registryFilePath}'. This means the " +
+                    "revit-mcp connector package was not extracted/installed correctly — the " +
+                    "shipped package always includes a populated command registry. Reinstall " +
+                    "the connector; do not continue with zero commands registered.",
+                    registryFilePath);
             }
 
             return registryFilePath;
-        }
-        /// <summary>
-        /// Creates a default command registry file with empty commands array
-        /// </summary>
-        /// <param name="filePath">Path where to create the file</param>
-        private static void CreateDefaultCommandRegistryFile(string filePath)
-        {
-            try
-            {
-                var defaultRegistry = new { commands = new object[] { } };
-                string jsonContent = JsonConvert.SerializeObject(defaultRegistry, Formatting.Indented);
-
-                File.WriteAllText(filePath, jsonContent);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error creating default command registry file: {ex.Message}");
-            }
         }
         /// <summary>
         /// Ensures that the specified directory exists

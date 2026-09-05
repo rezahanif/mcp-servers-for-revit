@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -78,13 +78,21 @@ namespace revit_mcp_plugin.Core
             configManager.LoadConfiguration();
             
 
-            //// 从配置中读取服务端口
-            //// Read the service port from the configuration.
-            //if (configManager.Config.Settings.Port > 0)
-            //{
-            //    _port = configManager.Config.Settings.Port;
-            //}
-            _port = 8080; // 固定端口号 - Hard-wired port number.
+            // 从环境变量或配置中读取服务端口 (REVIT_SOCKET_PORT > Config.Settings.Port > 8080)
+            // Read service port from environment or configuration.
+            var envPortStr = Environment.GetEnvironmentVariable("REVIT_SOCKET_PORT");
+            if (!string.IsNullOrEmpty(envPortStr) && int.TryParse(envPortStr, out int envPort) && envPort > 0)
+            {
+                _port = envPort;
+            }
+            else if (configManager.Config?.Settings != null && configManager.Config.Settings.Port > 0)
+            {
+                _port = configManager.Config.Settings.Port;
+            }
+            else
+            {
+                _port = 8080;
+            }
 
             // 加载命令
             // Load command.
@@ -99,36 +107,37 @@ namespace revit_mcp_plugin.Core
         {
             if (_isRunning) return;
 
+            // SECURITY: loopback only, never IPAddress.Any.
+            //
+            // This socket accepts unauthenticated commands and can execute
+            // arbitrary C# inside Revit (send_code_to_revit). Bound to
+            // IPAddress.Any it put that on every interface, reachable by
+            // anyone who could route to the port — and it stayed reachable
+            // whether or not the AiConnect connector was enabled, because
+            // this listener lives in Revit, not in the connector process.
+            // Every gateway-side lifecycle gate (entitlement, activation
+            // lease, artifact integrity, disable) was therefore bypassable
+            // by talking to this port directly.
+            //
+            // Loopback does not make it authenticated — a same-user local
+            // process can still reach it — but it removes the network from
+            // the threat model, which is the difference between "local
+            // privilege" and "remote code execution in the CAD host".
+            // Mirrors the qgis-mcp plugin, which already refuses a
+            // non-loopback bind without an explicit token.
+            //
+            // Override deliberately, never by accident: REVIT_MCP_BIND_ANY=1
+            // restores the old behaviour for someone who genuinely needs a
+            // remote bind and has secured the network path themselves.
+            var bindAny = string.Equals(
+                Environment.GetEnvironmentVariable("REVIT_MCP_BIND_ANY"),
+                "1", StringComparison.Ordinal);
+            var bindAddress = bindAny ? IPAddress.Any : IPAddress.Loopback;
+
             try
             {
                 _isRunning = true;
 
-                // SECURITY: loopback only, never IPAddress.Any.
-                //
-                // This socket accepts unauthenticated commands and can execute
-                // arbitrary C# inside Revit (send_code_to_revit). Bound to
-                // IPAddress.Any it put that on every interface, reachable by
-                // anyone who could route to the port — and it stayed reachable
-                // whether or not the AiConnect connector was enabled, because
-                // this listener lives in Revit, not in the connector process.
-                // Every gateway-side lifecycle gate (entitlement, activation
-                // lease, artifact integrity, disable) was therefore bypassable
-                // by talking to this port directly.
-                //
-                // Loopback does not make it authenticated — a same-user local
-                // process can still reach it — but it removes the network from
-                // the threat model, which is the difference between "local
-                // privilege" and "remote code execution in the CAD host".
-                // Mirrors the qgis-mcp plugin, which already refuses a
-                // non-loopback bind without an explicit token.
-                //
-                // Override deliberately, never by accident: REVIT_MCP_BIND_ANY=1
-                // restores the old behaviour for someone who genuinely needs a
-                // remote bind and has secured the network path themselves.
-                var bindAny = string.Equals(
-                    Environment.GetEnvironmentVariable("REVIT_MCP_BIND_ANY"),
-                    "1", StringComparison.Ordinal);
-                var bindAddress = bindAny ? IPAddress.Any : IPAddress.Loopback;
                 if (bindAny)
                 {
                     _logger?.Info("REVIT_MCP_BIND_ANY=1 — binding all interfaces; this exposes unauthenticated code execution to the network.");
@@ -143,9 +152,10 @@ namespace revit_mcp_plugin.Core
                 };
                 _listenerThread.Start();              
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _isRunning = false;
+                _logger?.Error($"Failed to start Socket service on {bindAddress}:{_port}: {ex.Message}");
             }
         }
 
