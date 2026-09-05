@@ -54,7 +54,7 @@ namespace RevitMCPCommandSet.Services
                 }
                 if (invalidIds.Count > 0)
                 {
-                    TaskDialog.Show("警告", $"以下ID无效或元素不存在：{string.Join(", ", invalidIds)}");
+                    System.Diagnostics.Trace.WriteLine($"以下ID无效或元素不存在：{string.Join(", ", invalidIds)}", "警告");
                 }
                 // 如果有可删除的元素，则执行删除
                 if (elementIdsToDelete.Count > 0)
@@ -73,13 +73,13 @@ namespace RevitMCPCommandSet.Services
                 }
                 else
                 {
-                    TaskDialog.Show("错误", "没有有效的元素可以删除");
+                    System.Diagnostics.Trace.WriteLine("没有有效的元素可以删除", "错误");
                     IsSuccess = false;
                 }
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("错误", "删除元素失败: " + ex.Message);
+                System.Diagnostics.Trace.WriteLine("删除元素失败: " + ex.Message, "错误");
                 IsSuccess = false;
             }
             finally

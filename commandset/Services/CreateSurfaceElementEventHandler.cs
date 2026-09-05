@@ -25,7 +25,10 @@ namespace RevitMCPCommandSet.Services
         public AIResult<List<int>> Result { get; private set; }
         public string _floorName = "常规 - ";
         public bool _structural = true;
+        /// <summary>Element WAS created, but something the caller cannot see happened to it.</summary>
         private List<string> _warnings = new List<string>();
+        /// <summary>Entry produced NO element. See AIResult.Failures for why the two are separate.</summary>
+        private List<string> _failures = new List<string>();
 
         /// <summary>
         /// 设置创建的参数
@@ -43,6 +46,7 @@ namespace RevitMCPCommandSet.Services
             {
                 var elementIds = new List<int>();
                 _warnings.Clear();
+                _failures.Clear();
                 foreach (var data in CreatedInfo)
                 {
                     int requestedTypeId = data.TypeId;
@@ -55,12 +59,16 @@ namespace RevitMCPCommandSet.Services
                     Level topLevel = null;
                     double topOffset = -1;  // ft
                     double baseOffset = -1; // ft
-                    baseLevel = doc.FindNearestLevel(data.BaseLevel / 304.8);
-                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
-                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Thickness) / 304.8);
-                    topOffset = (data.BaseLevel + data.BaseOffset + data.Thickness) / 304.8 - topLevel.Elevation;
+                    // levelId (exact) wins over baseLevel (nearest-elevation guess).
+                    baseLevel = doc.ResolveLevel(data.LevelId, data.BaseLevel, out string levelWarning);
+                    if (levelWarning != null)
+                        _warnings.Add(levelWarning);
+                    // Null-check before dereferencing Elevation, as in the line handler.
                     if (baseLevel == null)
                         continue;
+                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
+                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Thickness) / 304.8);
+                    topOffset = (data.BaseLevel + data.BaseOffset + data.Thickness) / 304.8 - (topLevel?.Elevation ?? 0);
 
                     // Step2 获取族类型
                     FamilySymbol symbol = null;
@@ -103,7 +111,14 @@ namespace RevitMCPCommandSet.Services
                         case BuiltInCategory.OST_Floors:
                             if (floorType == null)
                             {
-                                // Requested typeId was invalid or not provided, fall back to first available
+                                // A requested-but-unresolvable typeId now fails the entry;
+                                // only an ABSENT typeId still falls back to a default.
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested floor typeId {requestedTypeId} is not a FloorType in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 floorType = new FilteredElementCollector(doc)
                                     .OfClass(typeof(FloorType))
                                     .OfCategory(BuiltInCategory.OST_Floors)
@@ -111,19 +126,23 @@ namespace RevitMCPCommandSet.Services
                                     .FirstOrDefault();
                                 if (floorType == null)
                                 {
-                                    _warnings.Add($"No floor types available in project.");
+                                    _failures.Add($"No floor types available in project.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
-                                {
-                                    _warnings.Add($"Requested floor typeId {requestedTypeId} not found. Defaulted to '{floorType.Name}' (ID: {floorType.Id.GetIntValue()})");
-                                }
+                                _warnings.Add($"No typeId given for a floor. Defaulted to '{floorType.Name}' " +
+                                              $"(ID: {floorType.Id.GetIntValue()}), which is whichever type came first and is probably not the one you want.");
                             }
                             break;
                         case BuiltInCategory.OST_Roofs:
                             if (roofType == null)
                             {
                                 // Get default roof type if not specified
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested roof typeId {requestedTypeId} is not a RoofType in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 roofType = new FilteredElementCollector(doc)
                                     .OfClass(typeof(RoofType))
                                     .OfCategory(BuiltInCategory.OST_Roofs)
@@ -131,19 +150,23 @@ namespace RevitMCPCommandSet.Services
                                     .FirstOrDefault();
                                 if (roofType == null)
                                 {
-                                    _warnings.Add($"No roof types available in project.");
+                                    _failures.Add($"No roof types available in project.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
-                                {
-                                    _warnings.Add($"Requested roof typeId {requestedTypeId} not found. Defaulted to '{roofType.Name}' (ID: {roofType.Id.GetIntValue()})");
-                                }
+                                _warnings.Add($"No typeId given for a roof. Defaulted to '{roofType.Name}' " +
+                                              $"(ID: {roofType.Id.GetIntValue()}), which is whichever type came first and is probably not the one you want.");
                             }
                             break;
                         case BuiltInCategory.OST_Ceilings:
                             if (ceilingType == null)
                             {
                                 // Get default ceiling type if not specified
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested ceiling typeId {requestedTypeId} is not a CeilingType in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 ceilingType = new FilteredElementCollector(doc)
                                     .OfClass(typeof(CeilingType))
                                     .OfCategory(BuiltInCategory.OST_Ceilings)
@@ -151,18 +174,22 @@ namespace RevitMCPCommandSet.Services
                                     .FirstOrDefault();
                                 if (ceilingType == null)
                                 {
-                                    _warnings.Add($"No ceiling types available in project.");
+                                    _failures.Add($"No ceiling types available in project.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
-                                {
-                                    _warnings.Add($"Requested ceiling typeId {requestedTypeId} not found. Defaulted to '{ceilingType.Name}' (ID: {ceilingType.Id.GetIntValue()})");
-                                }
+                                _warnings.Add($"No typeId given for a ceiling. Defaulted to '{ceilingType.Name}' " +
+                                              $"(ID: {ceilingType.Id.GetIntValue()}), which is whichever type came first and is probably not the one you want.");
                             }
                             break;
                         default:
                             if (symbol == null)
                             {
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested typeId {requestedTypeId} is not a FamilySymbol in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 symbol = new FilteredElementCollector(doc)
                                     .OfClass(typeof(FamilySymbol))
                                     .OfCategory(builtInCategory)
@@ -177,8 +204,13 @@ namespace RevitMCPCommandSet.Services
                                     .FirstOrDefault();
                                 }
                             }
+                            // A silent `continue` reported nothing at all: the entry
+                            // vanished and the count in the message was the only clue.
                             if (symbol == null)
+                            {
+                                _failures.Add($"No family types available for category {builtInCategory}.");
                                 continue;
+                            }
                             break;
                     }
 
@@ -265,15 +297,23 @@ namespace RevitMCPCommandSet.Services
                         transaction.Commit();
                     }
                 }
-                string message = $"Successfully created {elementIds.Count} element(s).";
+                // Success means every entry produced an element; a partial batch
+                // reports false so it cannot be mistaken for a complete one.
+                string message = $"Created {elementIds.Count} of {CreatedInfo.Count} element(s).";
+                if (_failures.Count > 0)
+                {
+                    message += "\n\n✖ Failed:\n  • " + string.Join("\n  • ", _failures);
+                }
                 if (_warnings.Count > 0)
                 {
                     message += "\n\n⚠ Warnings:\n  • " + string.Join("\n  • ", _warnings);
                 }
                 Result = new AIResult<List<int>>
                 {
-                    Success = true,
+                    Success = _failures.Count == 0,
                     Message = message,
+                    Warnings = new List<string>(_warnings),
+                    Failures = new List<string>(_failures),
                     Response = elementIds,
                 };
             }
@@ -282,9 +322,10 @@ namespace RevitMCPCommandSet.Services
                 Result = new AIResult<List<int>>
                 {
                     Success = false,
-                    Message = $"创建面状构件时出错: {ex.Message}",
+                    Message = $"Error creating surface-based element(s): {ex.Message}",
+                    Failures = new List<string> { ex.ToString() },
                 };
-                TaskDialog.Show("错误", $"创建面状构件时出错: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"创建面状构件时出错: {ex.Message}", "错误");
             }
             finally
             {
@@ -358,12 +399,29 @@ namespace RevitMCPCommandSet.Services
                     // 计算当前总厚度
                     double currentTotalThickness = cs.GetWidth();
 
-                    // 按比例调整每层厚度
-                    for (int i = 0; i < layers.Count; i++)
+                    // 按比例调整每层厚度（此前每层都被设为总厚度，N 层就厚 N 倍）
+                    //
+                    // The comment always said "scale each layer proportionally",
+                    // but the loop assigned the FULL requested thickness to every
+                    // layer, so a 3-layer type came out 3x too thick and only a
+                    // single-layer type was ever correct. Scale instead, and fall
+                    // back to an even split when the base type has no measurable
+                    // width to scale from.
+                    if (currentTotalThickness > 1e-9)
                     {
-                        CompoundStructureLayer layer = layers[i];
-                        double newLayerThickness = thickness;
-                        cs.SetLayerWidth(i, newLayerThickness);
+                        double scale = thickness / currentTotalThickness;
+                        for (int i = 0; i < layers.Count; i++)
+                        {
+                            cs.SetLayerWidth(i, layers[i].Width * scale);
+                        }
+                    }
+                    else
+                    {
+                        double even = thickness / layers.Count;
+                        for (int i = 0; i < layers.Count; i++)
+                        {
+                            cs.SetLayerWidth(i, even);
+                        }
                     }
 
                     // 应用修改后的构造层设置

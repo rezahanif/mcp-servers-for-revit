@@ -60,7 +60,7 @@ namespace RevitMCPCommandSet.Services
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Error", "获取选中元素失败: " + ex.Message);
+                System.Diagnostics.Trace.WriteLine("获取选中元素失败: " + ex.Message, "Error");
                 ResultElements = new List<Models.Common.ElementInfo>();
             }
             finally

@@ -45,7 +45,7 @@ namespace RevitMCPCommandSet.Services
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("error", "获取信息失败");
+                System.Diagnostics.Trace.WriteLine("获取信息失败", "error");
             }
             finally
             {

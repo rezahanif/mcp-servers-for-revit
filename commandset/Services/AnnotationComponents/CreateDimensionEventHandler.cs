@@ -220,7 +220,7 @@ public class CreateDimensionEventHandler : IExternalEventHandler, IWaitableExter
                 Message = $"Error creating dimensions: {ex.Message}",
                 Response = new List<int>()
             };
-            TaskDialog.Show("Error", $"Error creating dimensions: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine($"Error creating dimensions: {ex.Message}", "Error");
         }
         finally
         {
@@ -464,7 +464,7 @@ public class CreateDimensionEventHandler : IExternalEventHandler, IWaitableExter
         catch (Exception ex)
         {
             // Log error but continue processing
-            TaskDialog.Show("Debug", $"Error finding reference at point: {ex.Message}");
+            System.Diagnostics.Trace.WriteLine($"Error finding reference at point: {ex.Message}", "Debug");
         }
 
         return null;

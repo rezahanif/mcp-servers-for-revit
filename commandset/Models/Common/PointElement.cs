@@ -55,6 +55,14 @@ public class PointElement
     public double BaseLevel { get; set; }
 
     /// <summary>
+    ///     宿主标高的 ElementId。设置后直接使用该标高，跳过按标高值就近匹配。
+    ///     Explicit host Level. When set, it is used directly and BaseLevel's
+    ///     nearest-elevation match is skipped. -1 keeps the legacy behaviour.
+    /// </summary>
+    [JsonProperty("levelId")]
+    public int LevelId { get; set; } = -1;
+
+    /// <summary>
     ///     底部偏移
     /// </summary>
     [JsonProperty("baseOffset")]
