@@ -6,7 +6,7 @@ import { RevitError, ConnectionError } from "./errors.js";
 export function registerCreateSurfaceBasedElementTool(server: McpServer) {
   server.tool(
     "create_surface_based_element",
-    "Create one or more surface-based elements in Revit such as floors, ceilings, or roofs. Supports batch creation with detailed parameters including family type ID, boundary lines, thickness, and level information. All units are in millimeters (mm).",
+    "Domain: Architecture — planar geometry. Create one or more surface-based elements in Revit such as floors, ceilings, or roofs from a closed boundary loop. Supports batch creation with detailed parameters including family type ID, boundary lines, thickness, and level information. All units are in millimeters (mm). This tool does not inspect what already occupies the boundary it is given, and it does not necessarily attach to the level you expect: read the baseLevel and thickness notes below.",
     {
       data: z
         .array(
@@ -43,9 +43,38 @@ export function registerCreateSurfaceBasedElementTool(server: McpServer) {
                   .describe("Array of line segments defining the boundary"),
               })
               .describe("Boundary definition with outer loop"),
-            thickness: z.number().describe("Thickness of the element"),
-            baseLevel: z.number().describe("Base level height"),
-            baseOffset: z.number().describe("Offset from the base level"),
+            thickness: z
+              .number()
+              .describe(
+                "Thickness in mm. Unlike the wall case in create_line_based_element, this value IS honoured — " +
+                  "but by DUPLICATING the base type into a new project type named '<base><thickness>mm' and " +
+                  "editing its compound structure. Every distinct thickness therefore adds a type to the " +
+                  "document. Reuse an existing type via typeId when one already has the thickness you want."
+              ),
+            baseLevel: z
+              .number()
+              .describe(
+                "Base elevation in mm. This is an ELEVATION, not an ElementId, and it is resolved by NEAREST " +
+                  "MATCH against the levels that already exist: the level with the smallest |elevation - " +
+                  "baseLevel| wins, with NO distance limit, and a tie goes to the older level. Creating a level " +
+                  "and then passing its elevation does NOT guarantee the element lands on it. Pass levelId " +
+                  "instead whenever you know which level you mean. When the match is not exact the resolved " +
+                  "level and the difference are reported in `message` under 'Warnings'."
+              ),
+            levelId: z
+              .number()
+              .optional()
+              .describe(
+                "ElementId of the Level to host the element on. PREFER THIS over baseLevel. When set, the level " +
+                  "is used directly and no elevation matching happens. Get ids from ai_element_filter with " +
+                  "filterCategory 'OST_Levels'. Omit (or pass -1) to fall back to matching on baseLevel."
+              ),
+            baseOffset: z
+              .number()
+              .describe(
+                "Offset in mm from the RESOLVED base level — which may not be the level whose elevation you " +
+                  "passed in baseLevel. The absolute height you asked for is preserved; only the host differs."
+              ),
           })
         )
         .describe("Array of surface-based elements to create"),

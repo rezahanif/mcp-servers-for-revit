@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 import { RevitError, ConnectionError } from "./errors.js";
 export function registerGetCurrentViewElementsTool(server) {
-    server.tool("get_current_view_elements", "Get elements from the current active view in Revit. You can filter by model categories (like Walls, Floors) or annotation categories (like Dimensions, Text). Use includeHidden to show/hide invisible elements and limit to control the number of returned elements.", {
+    server.tool("get_current_view_elements", "Domain: any category — view-scoped read. Get elements from the current active view in Revit. You can filter by model categories (like Walls, Floors) or annotation categories (like Dimensions, Text). Use includeHidden to show/hide invisible elements and limit to control the number of returned elements. Scope is ALWAYS the active view and there is no argument to widen it, so anything outside that view is absent rather than deleted. Use ai_element_filter for a document-wide read, and get_current_view_info to confirm which view you are actually in.", {
         modelCategoryList: z
             .array(z.string())
             .optional()

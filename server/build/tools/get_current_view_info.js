@@ -1,7 +1,7 @@
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 import { RevitError, ConnectionError } from "./errors.js";
 export function registerGetCurrentViewInfoTool(server) {
-    server.tool("get_current_view_info", "获取 Revit 当前活动视图的详细信息，包括视图类型、名称、比例等属性。", {}, async (args, extra) => {
+    server.tool("get_current_view_info", "Domain: any category — session state. Get details of the currently active Revit view, including its view type, name, scale and related properties. Worth calling before and after any batch of view-scoped work: the active view can change during a session without the caller switching it, and every view-scoped read silently follows it, so results that disagree between two calls often mean the view moved rather than the model.", {}, async (args, extra) => {
         try {
             const response = await withRevitConnection(async (revitClient) => {
                 return await revitClient.sendCommand("get_current_view_info", {});

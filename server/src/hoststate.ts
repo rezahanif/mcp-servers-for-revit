@@ -32,7 +32,8 @@ function emit(state: string) {
 
 function probe() {
   const port = Number(process.env.REVIT_SOCKET_PORT ?? 8080);
-  const sock = net.connect({ host: "127.0.0.1", port });
+  const host = process.env.REVIT_SOCKET_HOST ?? "127.0.0.1";
+  const sock = net.connect({ host, port });
   const finish = (state: string) => {
     sock.destroy();
     emit(state);

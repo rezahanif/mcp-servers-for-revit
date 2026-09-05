@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 import { RevitError, ConnectionError } from "./errors.js";
 export function registerCreateLevelTool(server) {
-    server.tool("create_level", "Create one or more levels in Revit at specified elevations. Levels define horizontal planes in the building and are used to host floor plans, ceilings, and other level-based elements. All elevation units are in millimeters (mm).", {
+    server.tool("create_level", "Domain: Architecture — datums. Create one or more levels in Revit at specified elevations. Levels define horizontal planes in the building and are used to host floor plans, ceilings, and other level-based elements. All elevation units are in millimeters (mm). Creating a level here does NOT make later creates use it: the create_*_based_element tools match on elevation and hand the element to whichever level is nearest, so a new level placed close to an existing one may never receive anything. Capture the returned ElementId and pass it as levelId to those tools.", {
         data: z
             .array(z.object({
             name: z
@@ -10,7 +10,7 @@ export function registerCreateLevelTool(server) {
                 .describe("Name of the level (e.g., 'Level 2', 'Roof', 'Basement')"),
             elevation: z
                 .number()
-                .describe("Elevation of the level in millimeters (mm) from project origin"),
+                .describe("Elevation of the level in millimeters (mm) from project origin. Keep levels well separated: elevation is how the create_*_based_element tools pick a host, and two levels close together make that choice ambiguous for everything placed afterwards."),
             description: z
                 .string()
                 .optional()

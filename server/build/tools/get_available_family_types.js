@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withRevitConnection } from "../utils/ConnectionManager.js";
 import { RevitError, ConnectionError } from "./errors.js";
 export function registerGetAvailableFamilyTypesTool(server) {
-    server.tool("get_available_family_types", "Get available family types in the current Revit project. You can filter by category and family name, and limit the number of returned types.", {
+    server.tool("get_available_family_types", "Domain: any category — type resolution. Get available family types in the current Revit project, with their ElementIds. You can filter by category and family name, and limit the number of returned types. Call this before any create_*_based_element: those tools take a typeId, and when the id does not resolve they fall back to an arbitrary type of that category rather than failing, which is how the wrong material or assembly gets built.", {
         categoryList: z
             .array(z.string())
             .optional()
