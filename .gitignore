@@ -6,3 +6,9 @@ dist/
 
 # Built by scripts/build_plugin_zips.py from ~/project/revit-addin-releases/
 RevitMCPPlugin-*.zip
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
