@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.4] - 2026-09-07
+
+### Fixed
+- Recompiled Revit 2026 plugin and commandset targeting native `.NET 10.0` (`net10.0-windows10.0.19041.0`) to resolve CLR runtime mismatch warning on Revit 2026.
+- Added cross-compilation environment guard in `RevitMCPPlugin.csproj` for clean builds.
+
 ## [1.2.3] - 2026-09-07
 
 ### Added
