@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <RootNamespace>revit_mcp_plugin</RootNamespace>
@@ -89,14 +89,14 @@
             <AddinDir>$(RootDir)$(RootNameSpace)\</AddinDir>
         </PropertyGroup>
 
-        <Copy SourceFiles="@(RootItem)" DestinationFolder="$(RootDir)"/>
-        <Copy SourceFiles="@(AddinItem)" DestinationFolder="$(AddinDir)"/>
+        <Copy SourceFiles="@(RootItem)" DestinationFolder="$(RootDir)" SkipUnchangedFiles="false"/>
+        <Copy SourceFiles="@(AddinItem)" DestinationFolder="$(AddinDir)" SkipUnchangedFiles="false"/>
 
         <ItemGroup>
             <AddinFiles Include="$(RootDir)**\*.*"/>
         </ItemGroup>
         <Message Text="Copy files to Addin folder" Importance="high"/>
-        <Copy SourceFiles="@(AddinFiles)" DestinationFolder="$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\%(RecursiveDir)" Condition="$(Configuration.Contains('Debug'))"/>
+        <Copy SourceFiles="@(AddinFiles)" DestinationFolder="$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\%(RecursiveDir)" SkipUnchangedFiles="false"/>
     </Target>
 
 </Project>

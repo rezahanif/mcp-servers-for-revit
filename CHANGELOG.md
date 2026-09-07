@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-09-07
+
+### Fixed
+- Corrected misleading `[Info]` failure log in `CommandManager.cs` on successful command instance creation.
+- Updated `RevitMCPPlugin.csproj` copy target so Release configurations deploy to `%AppData%` correctly without getting skipped by Debug-only conditions.
+- Re-packaged connector archive with verified port 8088 registry, ping probe, and updated deployment targets.
+
 ## [1.2.0] - 2026-09-07
 
 ### Added
