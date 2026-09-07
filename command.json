@@ -127,6 +127,56 @@
       "commandName": "set_parameter_value",
       "description": "Write parameter values to existing elements (instance or type), with per-parameter failure reporting",
       "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_document_warnings",
+      "description": "Inspect all active warnings and unresolved failure messages in the Revit model",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "check_clashes",
+      "description": "Perform geometric interference and clash checks between Revit elements or categories",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "resolve_geometry_clash",
+      "description": "Resolve geometry collisions and overlaps using Revit's Cut Geometry or Join Geometry APIs",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "load_family",
+      "description": "Load a Revit family (.rfa) file into the current project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "place_family_instance",
+      "description": "Place instances of a loaded family at specified locations",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_family_type",
+      "description": "Create a new family type within a loaded family",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_family_types",
+      "description": "List all loaded family types in the project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_family_parameter",
+      "description": "Set parameter values on a family instance or family type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_direct_shape",
+      "description": "Generate custom 3D solid geometry (civil retaining walls, bridge piers, culverts, terrain)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "export_navisworks",
+      "description": "Export the Revit model to a Navisworks coordination file (.nwc)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
     }
   ]
 }

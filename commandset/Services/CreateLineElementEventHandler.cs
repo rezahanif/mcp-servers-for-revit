@@ -226,8 +226,9 @@ namespace RevitMCPCommandSet.Services
                     }
 
                     // Step3 调用通用方法创建族实例
-                    using (Transaction transaction = new Transaction(doc, "创建点状构件"))
+                    using (Transaction transaction = new Transaction(doc, "创建线状构件"))
                     {
+                        var preprocessor = TransactionUtils.ConfigureWarningSuppression(transaction);
                         transaction.Start();
                         switch (builtInCategory)
                         {
@@ -290,8 +291,15 @@ namespace RevitMCPCommandSet.Services
                                 }
                                 break;
                         }
-                        //doc.Refresh();
                         transaction.Commit();
+                        if (preprocessor.Warnings != null && preprocessor.Warnings.Count > 0)
+                        {
+                            _warnings.AddRange(preprocessor.Warnings);
+                        }
+                        if (preprocessor.Failures != null && preprocessor.Failures.Count > 0)
+                        {
+                            _failures.AddRange(preprocessor.Failures);
+                        }
                     }
                 }
                 // Success now means "every entry produced an element". A batch where

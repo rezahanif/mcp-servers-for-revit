@@ -90,6 +90,7 @@ def main() -> int:
             p for p in d.rglob("*")
             if p.is_file()
             and p.suffix not in SKIP_SUFFIX
+            and p.name != "commandRegistry.json"
             and not (set(p.relative_to(d).parts) & SKIP_PARTS)
         )
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:

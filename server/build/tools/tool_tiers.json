@@ -5,8 +5,11 @@
   "tier1": [
     "ai_element_filter",
     "analyze_model_statistics",
+    "check_clashes",
     "color_elements",
     "create_dimensions",
+    "create_direct_shape",
+    "create_family_type",
     "create_grid",
     "create_level",
     "create_line_based_element",
@@ -15,19 +18,26 @@
     "create_structural_framing_system",
     "create_surface_based_element",
     "delete_element",
+    "export_navisworks",
     "export_room_data",
     "get_available_family_types",
     "get_current_view_elements",
     "get_current_view_info",
+    "get_document_warnings",
+    "get_family_types",
     "get_material_quantities",
     "get_selected_elements",
     "list_revit_api_categories",
     "list_revit_templates",
+    "load_family",
     "load_revit_template",
     "operate_element",
+    "place_family_instance",
     "query_revit_registry",
+    "resolve_geometry_clash",
     "search_revit_api",
     "send_code_to_revit",
+    "set_family_parameter",
     "set_parameter_value",
     "tag_all_rooms",
     "tag_all_walls"
@@ -75,10 +85,6 @@
     },
     "create_electrical_system": {
       "command": "create_electrical_system",
-      "reason": "no_revit_command_handler"
-    },
-    "create_family_type": {
-      "command": "create_family_type",
       "reason": "no_revit_command_handler"
     },
     "create_fire_protection": {
@@ -189,10 +195,6 @@
       "command": "get_family_parameters",
       "reason": "no_revit_command_handler"
     },
-    "get_family_types": {
-      "command": "get_family_types",
-      "reason": "no_revit_command_handler"
-    },
     "get_mep_elements": {
       "command": "get_mep_elements",
       "reason": "no_revit_command_handler"
@@ -241,10 +243,6 @@
       "command": "import_ifc",
       "reason": "no_revit_command_handler"
     },
-    "load_family": {
-      "command": "load_family",
-      "reason": "no_revit_command_handler"
-    },
     "modify_family_type": {
       "command": "modify_family_type",
       "reason": "no_revit_command_handler"
@@ -253,20 +251,12 @@
       "command": "modify_schedule_cell",
       "reason": "no_revit_command_handler"
     },
-    "place_family_instance": {
-      "command": "place_family_instance",
-      "reason": "no_revit_command_handler"
-    },
     "set_element_phase": {
       "command": "set_element_phase",
       "reason": "no_revit_command_handler"
     },
     "set_element_workset": {
       "command": "set_element_workset",
-      "reason": "no_revit_command_handler"
-    },
-    "set_family_parameter": {
-      "command": "set_family_parameter",
       "reason": "no_revit_command_handler"
     },
     "set_mep_offsets": {

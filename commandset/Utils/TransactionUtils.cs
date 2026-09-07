@@ -1,4 +1,4 @@
-﻿// 
+// 
 //                       RevitAPI-Solutions
 // Copyright (c) Duong Tran Quang (DTDucas) (baymax.contact@gmail.com)
 // 
@@ -29,6 +29,19 @@ namespace RevitMCPCommandSet.Utils;
 public static class TransactionUtils
 {
     /// <summary>
+    ///     Configures failure handling options on a transaction to suppress interactive UI modal dialogs
+    ///     and capture all warnings and failures programmatically.
+    /// </summary>
+    public static CaptureWarningsPreprocessor ConfigureWarningSuppression(Transaction transaction)
+    {
+        var preprocessor = new CaptureWarningsPreprocessor();
+        var options = transaction.GetFailureHandlingOptions();
+        options.SetFailuresPreprocessor(preprocessor);
+        transaction.SetFailureHandlingOptions(options);
+        return preprocessor;
+    }
+
+    /// <summary>
     ///     Execute an operation within a transaction
     /// </summary>
     /// <typeparam name="T">Result data type</typeparam>
@@ -39,6 +52,7 @@ public static class TransactionUtils
     public static T ExecuteInTransaction<T>(Document doc, string transactionName, Func<T> action)
     {
         using var transaction = new Transaction(doc, transactionName);
+        ConfigureWarningSuppression(transaction);
         transaction.Start();
         try
         {
@@ -54,6 +68,29 @@ public static class TransactionUtils
     }
 
     /// <summary>
+    ///     Execute an operation within a transaction with warning collection
+    /// </summary>
+    public static T ExecuteInTransaction<T>(Document doc, string transactionName, Func<T> action, out List<string> warnings)
+    {
+        using var transaction = new Transaction(doc, transactionName);
+        var preprocessor = ConfigureWarningSuppression(transaction);
+        transaction.Start();
+        try
+        {
+            var result = action();
+            transaction.Commit();
+            warnings = preprocessor.Warnings;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            transaction.RollBack();
+            warnings = preprocessor.Warnings;
+            throw new Exception($"Error executing '{transactionName}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
     ///     Execute an operation within a transaction (no return value)
     /// </summary>
     /// <param name="doc">Revit document</param>
@@ -62,6 +99,7 @@ public static class TransactionUtils
     public static void ExecuteInTransaction(Document doc, string transactionName, Action action)
     {
         using var transaction = new Transaction(doc, transactionName);
+        ConfigureWarningSuppression(transaction);
         transaction.Start();
         try
         {

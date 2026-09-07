@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using revit_mcp_plugin.Configuration;
 using revit_mcp_plugin.Utils;
 using System;
@@ -80,41 +80,61 @@ namespace revit_mcp_plugin.UI
                                 List<string> supportedCommandVersions = new List<string>();
                                 string dllBasePath = null;
 
-                                foreach (var version in versionDirectories)
+                                if (versionDirectories.Count > 0)
                                 {
-                                    string versionDirectory = Path.Combine(directory, version);
-                                    string versionDllPath = null;
-
-                                    if (!string.IsNullOrEmpty(command.AssemblyPath))
+                                    foreach (var version in versionDirectories)
                                     {
-                                        // 如果指定了相对路径，在版本子文件夹中查找
-                                        versionDllPath = Path.Combine(versionDirectory, command.AssemblyPath);
-                                        if (File.Exists(versionDllPath))
+                                        string versionDirectory = Path.Combine(directory, version);
+                                        string versionDllPath = null;
+
+                                        if (!string.IsNullOrEmpty(command.AssemblyPath))
                                         {
-                                            // 记录基本路径模板
-                                            if (dllBasePath == null)
+                                            // 如果指定了相对路径，在版本子文件夹中查找
+                                            versionDllPath = Path.Combine(versionDirectory, command.AssemblyPath);
+                                            if (File.Exists(versionDllPath))
                                             {
-                                                // 提取相对路径，用于创建模板
-                                                dllBasePath = Path.Combine(commandSetData.Name, "{VERSION}", command.AssemblyPath);
+                                                // 记录基本路径模板
+                                                if (dllBasePath == null)
+                                                {
+                                                    // 提取相对路径，用于创建模板
+                                                    dllBasePath = Path.Combine(commandSetData.Name, "{VERSION}", command.AssemblyPath);
+                                                }
+                                                supportedCommandVersions.Add(version);
                                             }
-                                            supportedCommandVersions.Add(version);
+                                        }
+                                        else
+                                        {
+                                            // 如果没有指定路径，在版本子文件夹中查找任意DLL
+                                            var dllFiles = Directory.GetFiles(versionDirectory, "*.dll");
+                                            if (dllFiles.Length > 0)
+                                            {
+                                                versionDllPath = dllFiles[0]; // 使用找到的第一个DLL
+                                                if (dllBasePath == null)
+                                                {
+                                                    // 提取DLL文件名
+                                                    string dllFileName = Path.GetFileName(versionDllPath);
+                                                    dllBasePath = Path.Combine(commandSetData.Name, "{VERSION}", dllFileName);
+                                                }
+                                                supportedCommandVersions.Add(version);
+                                            }
                                         }
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    // 平铺目录支持 (Flat directory fallback: dll directly in directory or commandsDirectory)
+                                    string flatDllName = !string.IsNullOrEmpty(command.AssemblyPath) ? command.AssemblyPath : $"{commandSetData.Name}.dll";
+                                    string candidate1 = Path.Combine(directory, flatDllName);
+                                    string candidate2 = Path.Combine(commandsDirectory, flatDllName);
+                                    if (File.Exists(candidate1))
                                     {
-                                        // 如果没有指定路径，在版本子文件夹中查找任意DLL
-                                        var dllFiles = Directory.GetFiles(versionDirectory, "*.dll");
-                                        if (dllFiles.Length > 0)
-                                        {
-                                            versionDllPath = dllFiles[0]; // 使用找到的第一个DLL
-                                            if (dllBasePath == null)
-                                            {
-                                                // 提取DLL文件名
-                                                string dllFileName = Path.GetFileName(versionDllPath);
-                                                dllBasePath = Path.Combine(commandSetData.Name, "{VERSION}", dllFileName);
-                                            }
-                                            supportedCommandVersions.Add(version);
-                                        }
+                                        dllBasePath = Path.Combine(commandSetData.Name, flatDllName);
+                                        supportedCommandVersions.Add("2026");
+                                    }
+                                    else if (File.Exists(candidate2))
+                                    {
+                                        dllBasePath = flatDllName;
+                                        supportedCommandVersions.Add("2026");
                                     }
                                 }
 
@@ -151,8 +171,8 @@ namespace revit_mcp_plugin.UI
                 if (File.Exists(registryFilePath))
                 {
                     string registryJson = File.ReadAllText(registryFilePath);
-                    var registry = JsonConvert.DeserializeObject<CommandRegistryJson>(registryJson);
-                    if (registry?.Commands != null)
+                    var registry = JsonConvert.DeserializeObject<FrameworkConfig>(registryJson);
+                    if (registry?.Commands != null && registry.Commands.Count > 0)
                     {
                         // Keep only valid commands
                         List<CommandConfig> validCommands = new List<CommandConfig>();
@@ -172,8 +192,8 @@ namespace revit_mcp_plugin.UI
                                 }
                             }
                         }
-                        // If there are invalid commands, update the registry file
-                        if (validCommands.Count != registry.Commands.Count)
+                        // If there are invalid commands, update the registry file (only if we found valid commands, never wipe out to 0)
+                        if (availableCommandNames.Count > 0 && validCommands.Count > 0 && validCommands.Count != registry.Commands.Count)
                         {
                             registry.Commands = validCommands;
                             string updatedJson = JsonConvert.SerializeObject(registry, Formatting.Indented);
@@ -269,12 +289,13 @@ namespace revit_mcp_plugin.UI
             try
             {
                 string registryFilePath = PathManager.GetCommandRegistryFilePath();
-                // 读取现有的注册表以保留完整的命令信息
+                // 读取现有的注册表以保留完整的命令信息和全局设置
                 Dictionary<string, CommandConfig> existingCommandsDict = new Dictionary<string, CommandConfig>();
+                FrameworkConfig existingRegistry = null;
                 if (File.Exists(registryFilePath))
                 {
                     string registryJson = File.ReadAllText(registryFilePath);
-                    var existingRegistry = JsonConvert.DeserializeObject<CommandRegistryJson>(registryJson);
+                    existingRegistry = JsonConvert.DeserializeObject<FrameworkConfig>(registryJson);
                     if (existingRegistry?.Commands != null)
                     {
                         foreach (var cmd in existingRegistry.Commands)
@@ -283,8 +304,12 @@ namespace revit_mcp_plugin.UI
                         }
                     }
                 }
-                // 创建新的registry对象
-                CommandRegistryJson registry = new CommandRegistryJson();
+                // 创建新的registry对象并保留现有的全局设置（如端口号）
+                FrameworkConfig registry = new FrameworkConfig();
+                if (existingRegistry?.Settings != null)
+                {
+                    registry.Settings = existingRegistry.Settings;
+                }
                 registry.Commands = new List<CommandConfig>();
                 // 收集所有"已启用"的命令
                 foreach (var commandSet in commandSets)
@@ -339,6 +364,15 @@ namespace revit_mcp_plugin.UI
                         }
                     }
                 }
+
+                // 安全防线：如果扫描结果为空但之前存在有效命令，拒绝覆写注册表以防抹空
+                if (registry.Commands.Count == 0 && existingCommandsDict.Count > 0)
+                {
+                    MessageBox.Show("Warning: No commands were selected or discovered. Existing command registry was preserved to prevent server disruption.",
+                                  "Save Aborted", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 // 构建摘要以显示
                 string enabledFeaturesText = "";
                 int enabledCount = registry.Commands.Count;
@@ -386,9 +420,8 @@ namespace revit_mcp_plugin.UI
         public List<CommandConfig> Commands { get; set; } = new List<CommandConfig>();
     }
     // Configuration files
-    public class CommandRegistryJson
+    public class CommandRegistryJson : FrameworkConfig
     {
-        public List<CommandConfig> Commands { get; set; } = new List<CommandConfig>();
     }
 
     public class CommandJson

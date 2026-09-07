@@ -1,11 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <UseWPF>true</UseWPF>
         <LangVersion>latest</LangVersion>
         <PlatformTarget>x64</PlatformTarget>
         <ImplicitUsings>true</ImplicitUsings>
-        <PublishAddinFiles>true</PublishAddinFiles>
+        <!-- Disabled: this Nice3point.Revit.Build.Tasks feature auto-publishes to
+             Addins\<ver>\RevitMCPCommandSet\ on every build (Debug AND Release) - a
+             top-level path the runtime never reads (PathManager/commandRegistry.json
+             resolve RevitMCPCommandSet.dll flat under revit_mcp_plugin\Commands\).
+             Left on, it recreates a duplicate-assembly-identity copy of this DLL on
+             every local build, which is exactly what caused the "Assembly with same
+             name is already loaded" failure (2026-09-07). DeployCommandSet below
+             already handles the correct deployment paths. -->
+        <PublishAddinFiles>false</PublishAddinFiles>
         <!-- Revit loads each add-in via its own AssemblyDependencyResolver, not the
              shared runtime, so transitive package deps the SDK treats as
              framework-provided (System.Collections.Immutable, System.Reflection.Metadata,
@@ -97,7 +105,14 @@
         <PropertyGroup>
             <PluginAddInRoot>$(ProjectDir)..\plugin\bin\AddIn $(RevitVersion) $(Configuration)\revit_mcp_plugin\</PluginAddInRoot>
             <CommandSetPluginDir>$(PluginAddInRoot)Commands\RevitMCPCommandSet\</CommandSetPluginDir>
-            <RevitAddinsDir>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\revit_mcp_plugin\Commands\RevitMCPCommandSet\</RevitAddinsDir>
+            <!-- Flat: matches PathManager.GetCommandsDirectoryPath() + commandRegistry.json's
+                 "assemblyPath": "RevitMCPCommandSet.dll", which resolve directly under
+                 revit_mcp_plugin\Commands\ with no version subfolder. Previously this had an
+                 extra \RevitMCPCommandSet\<ver>\ nesting that the runtime never loads from -
+                 it just left a second, dead copy of the assembly identity sitting next to the
+                 one actually used, which is what caused "Assembly with same name is already
+                 loaded" (2026-09-07). -->
+            <RevitAddinsDir>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)\revit_mcp_plugin\Commands\</RevitAddinsDir>
         </PropertyGroup>
 
         <ItemGroup>
@@ -110,9 +125,9 @@
         <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(CommandSetPluginDir)$(RevitVersion)\" />
         <Copy SourceFiles="@(CommandJsonFile)" DestinationFolder="$(CommandSetPluginDir)" />
 
-        <!-- Debug only: Copy to Revit Addins folder for local development -->
-        <MakeDir Directories="$(RevitAddinsDir)$(RevitVersion)" Condition="$(Configuration.Contains('Debug'))" />
-        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(RevitAddinsDir)$(RevitVersion)\" Condition="$(Configuration.Contains('Debug'))" />
+        <!-- Debug only: Copy directly to Revit's live flat Commands\ dir for local development. -->
+        <MakeDir Directories="$(RevitAddinsDir)" Condition="$(Configuration.Contains('Debug'))" />
+        <Copy SourceFiles="@(CommandSetBinaries)" DestinationFolder="$(RevitAddinsDir)" Condition="$(Configuration.Contains('Debug'))" />
         <Copy SourceFiles="@(CommandJsonFile)" DestinationFolder="$(RevitAddinsDir)" Condition="$(Configuration.Contains('Debug'))" />
     </Target>
 
