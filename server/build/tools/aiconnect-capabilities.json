@@ -57,11 +57,6 @@
    "category": "mep"
   },
   {
-   "name": "create_family_type",
-   "description": "Create a new family type by duplicating an existing one",
-   "category": "family"
-  },
-  {
    "name": "create_fire_protection",
    "description": "Create fire protection piping (sprinkler, standpipe)",
    "category": "mep"
@@ -197,11 +192,6 @@
    "category": "family"
   },
   {
-   "name": "get_family_types",
-   "description": "List all loaded family types filtered by name/category",
-   "category": "family"
-  },
-  {
    "name": "get_mep_elements",
    "description": "Query MEP elements filtered by system type/category",
    "category": "mep"
@@ -262,11 +252,6 @@
    "category": "interoperability"
   },
   {
-   "name": "load_family",
-   "description": "Load an .rfa family file into the project",
-   "category": "family"
-  },
-  {
    "name": "modify_family_type",
    "description": "Edit parameter values of an existing family type",
    "category": "family"
@@ -277,11 +262,6 @@
    "category": "scheduling"
   },
   {
-   "name": "place_family_instance",
-   "description": "Place family instances at specified locations",
-   "category": "family"
-  },
-  {
    "name": "set_element_phase",
    "description": "Assign created and demolished phases to elements",
    "category": "phasing"
@@ -290,11 +270,6 @@
    "name": "set_element_workset",
    "description": "Assign elements to a workset for worksharing",
    "category": "workset"
-  },
-  {
-   "name": "set_family_parameter",
-   "description": "Set parameter values on family instances or types",
-   "category": "family"
   },
   {
    "name": "set_mep_offsets",

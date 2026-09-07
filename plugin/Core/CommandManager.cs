@@ -105,12 +105,36 @@ namespace revit_mcp_plugin.Core
                 // 确定程序集路径
                 // Determine the assembly path.
                 string assemblyPath = config.AssemblyPath;
+                string baseDir = PathManager.GetCommandsDirectoryPath();
                 if (!Path.IsPathRooted(assemblyPath))
                 {
                     // 如果不是绝对路径，则相对于Commands目录
                     // If it is not an absolute path, then it is relative to the Command's directory.
-                    string baseDir = PathManager.GetCommandsDirectoryPath();
                     assemblyPath = Path.Combine(baseDir, assemblyPath);
+                }
+
+                if (!File.Exists(assemblyPath))
+                {
+                    string fileName = Path.GetFileName(config.AssemblyPath);
+
+                    // 备选路径1：Commands目录下的扁平DLL
+                    // Fallback 1: Flat DLL directly under Commands directory
+                    string flatCandidate = Path.Combine(baseDir, fileName);
+                    if (File.Exists(flatCandidate))
+                    {
+                        assemblyPath = flatCandidate;
+                    }
+                    else
+                    {
+                        // 备选路径2：版本化子目录下的DLL
+                        // Fallback 2: Versioned subfolder Commands/RevitMCPCommandSet/<version>/
+                        string currentVersion = _versionAdapter.GetRevitVersion();
+                        string versionedCandidate = Path.Combine(baseDir, "RevitMCPCommandSet", currentVersion, fileName);
+                        if (File.Exists(versionedCandidate))
+                        {
+                            assemblyPath = versionedCandidate;
+                        }
+                    }
                 }
 
                 if (!File.Exists(assemblyPath))
@@ -168,7 +192,7 @@ namespace revit_mcp_plugin.Core
                             if (command.CommandName == config.CommandName)
                             {
                                 _commandRegistry.RegisterCommand(command);
-                                _logger.Info("创建命令实例成功 [{0}]: {1}\nSuccessfully created command instance [{0}]: {1}",
+                                _logger.Info("命令注册成功 [{0}]: {1}\nRegistered command [{0}]: {1}",
                                     command.CommandName, Path.GetFileName(assemblyPath));
                                 break; // 找到匹配的命令后退出循环 - Exit the loop after finding a matching command.
                             }

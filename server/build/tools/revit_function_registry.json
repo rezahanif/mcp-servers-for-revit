@@ -755,8 +755,8 @@
       "kind": "Tool",
       "description": "Load an .rfa family file into the project",
       "category": "family",
-      "verification_status": "unimplemented",
-      "tier": 2,
+      "verification_status": "seeded",
+      "tier": 1,
       "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
     },
     {
@@ -764,8 +764,8 @@
       "kind": "Tool",
       "description": "List all loaded family types filtered by name/category",
       "category": "family",
-      "verification_status": "unimplemented",
-      "tier": 2,
+      "verification_status": "seeded",
+      "tier": 1,
       "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
     },
     {
@@ -773,8 +773,8 @@
       "kind": "Tool",
       "description": "Create a new family type by duplicating an existing one",
       "category": "family",
-      "verification_status": "unimplemented",
-      "tier": 2,
+      "verification_status": "seeded",
+      "tier": 1,
       "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
     },
     {
@@ -791,8 +791,8 @@
       "kind": "Tool",
       "description": "Place family instances at specified locations",
       "category": "family",
-      "verification_status": "unimplemented",
-      "tier": 2,
+      "verification_status": "seeded",
+      "tier": 1,
       "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
     },
     {
@@ -809,8 +809,8 @@
       "kind": "Tool",
       "description": "Set parameter values on family instances or types",
       "category": "family",
-      "verification_status": "unimplemented",
-      "tier": 2,
+      "verification_status": "seeded",
+      "tier": 1,
       "hint": "No Revit command handler exists for this tool; it is not on the tool surface. Implement it with send_code_to_revit."
     },
     {
@@ -1005,6 +1005,46 @@
       "category": "workset",
       "namespace": "Autodesk.Revit.DB",
       "verification_status": "seeded"
+    },
+    {
+      "path": "get_document_warnings",
+      "kind": "Tool",
+      "description": "Inspect active warnings and unresolved failure messages in the Revit model",
+      "category": "inspection",
+      "verification_status": "seeded",
+      "tier": 1
+    },
+    {
+      "path": "check_clashes",
+      "kind": "Tool",
+      "description": "Perform geometric interference and clash checks between Revit elements or categories",
+      "category": "coordination",
+      "verification_status": "seeded",
+      "tier": 1
+    },
+    {
+      "path": "resolve_geometry_clash",
+      "kind": "Tool",
+      "description": "Resolve geometry collisions and overlaps using Revit Cut Geometry or Join Geometry APIs",
+      "category": "coordination",
+      "verification_status": "seeded",
+      "tier": 1
+    },
+    {
+      "path": "create_direct_shape",
+      "kind": "Tool",
+      "description": "Generate custom 3D solid geometry for civil and infrastructure engineering (retaining walls, piers, culverts)",
+      "category": "creation",
+      "verification_status": "seeded",
+      "tier": 1
+    },
+    {
+      "path": "export_navisworks",
+      "kind": "Tool",
+      "description": "Export the Revit model to a Navisworks coordination file (.nwc) with shared coordinates and element IDs",
+      "category": "interoperability",
+      "verification_status": "seeded",
+      "tier": 1
     }
   ]
 }
