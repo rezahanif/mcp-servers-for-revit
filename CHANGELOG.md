@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.3] - 2026-09-07
+
+### Added
+- Clash detection (`check_clashes`, `resolve_geometry_clash`)
+- Warning modal suppression and query (`get_document_warnings`)
+- Family management (`load_family`, `place_family_instance`, `create_family_type`, `set_family_parameter`)
+- Civil DirectShape geometry creation (`create_direct_shape`)
+- Navisworks export support (`export_navisworks`)
+- User-oriented connection tutorial with Mermaid flowchart in `TUTORIAL.md`
+
+## [1.2.2] - 2026-09-07
+
+### Changed
+- Refreshed connection tutorial and marketplace metadata.
+
 ## [1.2.1] - 2026-09-07
 
 ### Fixed
