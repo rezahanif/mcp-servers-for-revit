@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-09-07
+
+### Added
+- Port discovery and ping probe handshake between server and Revit add-in
+- Connector-wide reliability notes appended to tool descriptions with warning surfacing
+- Structured warnings and failures surfaced in `AIResult` for CommandSet
+
+### Changed
+- Migrated default socket communication port to 8088
+- Support `REVIT_SOCKET_PORT` environment variable and fail-fast when `commandRegistry.json` is missing
+- Rebuilt `RevitMCPPlugin-*.zip` archives with port 8088 in `commandRegistry.json`
+
+## [1.1.0] - 2026-09-05
+
+### Changed
+- Set entitlement tier to free
+- Port conflict resolution with OS-assigned fallback
+
 ## [1.0.2] - 2026-09-03
 
 ### Fixed

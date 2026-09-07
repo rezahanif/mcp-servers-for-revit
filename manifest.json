@@ -3,7 +3,7 @@
   "package_format_version": 1,
   "id": "revit-mcp",
   "name": "Revit Connector",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "platform": {
     "os": "windows",
     "arch": "x64"
