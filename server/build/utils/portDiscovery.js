@@ -14,7 +14,7 @@ import fs from "fs";
 import path from "path";
 const PORT_FILE_DIR = "aiconnect-revit-mcp";
 const PORT_FILE_NAME = "port.txt";
-const DEFAULT_PORT = 8080;
+const DEFAULT_PORT = 8088;
 function portFilePath() {
     const localAppData = process.env.LOCALAPPDATA;
     if (!localAppData)

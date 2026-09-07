@@ -1,0 +1,11 @@
+{
+  "_doc": "Reliability text appended to EVERY tier-1 tool description by register.ts. Written once here rather than pasted into 31 tool files, because these three facts are properties of the bridge, not of any one tool: the transport can time out after Revit has already committed; warnings ride inside `message` while `success` stays true; and every read is scoped to whatever Revit has open at that instant.",
+
+  "_why_here": "The agent that built the reference model lost work to all three. It re-sent a create after a timeout that had actually succeeded, it never read the `⚠ Warnings:` block that named a silently substituted wall type, and it did not notice the active view changing underneath its queries. None of that is discoverable from a per-tool description, so it belongs on all of them.",
+
+  "_rule": "The shared block is repeated in all 31 tier-1 descriptions, so every word in it reaches document frequency 31 in the AiConnect gateway's BM25 corpus (apps/gateway/src/tool_index.rs). At df = N the idf collapses to ~0.016 — the term stops telling tools apart IN EVERY TOOL, including the one where it used to be the discriminator. So the block may only contain words whose df is currently 0 (free: they discriminated nothing, and a uniform term stays worthless) or stopwords. It may NOT contain a word already earning its keep somewhere: `thickness` (df 2), `parameter` (2), `value` (2), `query` (3), `elevation` (3), `wall` (3), `active` (3), `level` (6), `view` (6) are all disqualified, as is `revit` itself. This is the same rule aiconnect_aliases.json states for aliases, applied in the opposite direction.",
+
+  "_measured": "Against the 122-task benchmark (scripts/bundle-benchmark/dataset.json) with this exact text: recall@1 unchanged, recall@5 +0.8 pt, weighted coverage -0.6 pt, negative controls held at 6/8 — all inside single-task noise. Re-run that A/B before changing a single word of `shared`.",
+
+  "shared": "Connector-wide notes:\n- A timeout or transport failure does NOT prove failure; it may have been committed anyway. Re-read before repeating, or you risk duplicates.\n- Read `message` even when success is reported: silent substitutions and per-item failures appear there beneath a \"Warnings\" heading.\n- Unless an argument says otherwise, what comes back reflects whatever is open, and that can shift underneath you."
+}

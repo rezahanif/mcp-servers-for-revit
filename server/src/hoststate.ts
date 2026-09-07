@@ -33,13 +33,33 @@ function emit(state: string) {
 
 function probe() {
   const port = getRevitSocketPort();
-  const sock = net.connect({ host: "127.0.0.1", port });
+  const host = process.env.REVIT_SOCKET_HOST ?? "127.0.0.1";
+  let finished = false;
+  const sock = net.connect({ host, port });
   const finish = (state: string) => {
+    if (finished) return;
+    finished = true;
     sock.destroy();
     emit(state);
   };
-  sock.setTimeout(1000, () => finish("waiting_for_host"));
-  sock.once("connect", () => finish("connected"));
+  sock.setTimeout(1500, () => finish("waiting_for_host"));
+  sock.once("connect", () => {
+    // Send a JSON-RPC ping to verify this is genuinely Revit MCP Server, not an unrelated listener
+    const pingMsg = JSON.stringify({ jsonrpc: "2.0", method: "ping", id: "probe" }) + "\n";
+    sock.write(pingMsg);
+  });
+  sock.on("data", (data) => {
+    try {
+      const resp = JSON.parse(data.toString());
+      if (resp && (resp.id === "probe" || resp.result !== undefined)) {
+        finish("connected");
+      } else {
+        finish("waiting_for_host");
+      }
+    } catch {
+      finish("waiting_for_host");
+    }
+  });
   sock.once("error", () => finish("waiting_for_host"));
 }
 

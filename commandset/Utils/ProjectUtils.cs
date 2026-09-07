@@ -422,7 +422,7 @@ namespace RevitMCPCommandSet.Utils
 
                 if (view3D == null)
                 {
-                    TaskDialog.Show("错误", "无法创建或获取3D视图");
+                    System.Diagnostics.Trace.WriteLine("无法创建或获取3D视图", "错误");
                     return null;
                 }
 
@@ -481,7 +481,7 @@ namespace RevitMCPCommandSet.Utils
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("错误", $"获取最近面时发生错误：{ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"获取最近面时发生错误：{ex.Message}", "错误");
                 return null;
             }
         }
@@ -539,7 +539,7 @@ namespace RevitMCPCommandSet.Utils
 
                 if (view3D == null)
                 {
-                    TaskDialog.Show("错误", "无法创建或获取3D视图");
+                    System.Diagnostics.Trace.WriteLine("无法创建或获取3D视图", "错误");
                     return null;
                 }
 
@@ -604,7 +604,7 @@ namespace RevitMCPCommandSet.Utils
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("错误", $"获取最近宿主元素时发生错误：{ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"获取最近宿主元素时发生错误：{ex.Message}", "错误");
                 return null;
             }
         }
@@ -698,7 +698,7 @@ namespace RevitMCPCommandSet.Utils
 
             if (solidFill == null)
             {
-                TaskDialog.Show("错误", "未找到实心填充图案");
+                System.Diagnostics.Trace.WriteLine("未找到实心填充图案", "错误");
                 return;
             }
 
@@ -986,6 +986,66 @@ namespace RevitMCPCommandSet.Utils
             newLevel.Name = levelName;
 
             return newLevel;
+        }
+
+        /// <summary>
+        /// Elevation agreement tolerance for level resolution: 1 mm, expressed in
+        /// Revit's internal feet. Inside it, an elevation match is treated as the
+        /// caller naming that level; outside it, the caller asked for one height
+        /// and got a different one, which is worth saying out loud.
+        /// </summary>
+        public const double LevelMatchToleranceFt = 1.0 / 304.8;
+
+        /// <summary>
+        /// Resolve the host level for a create operation, and report what was done.
+        ///
+        /// Two ways in. <paramref name="levelId"/> is EXACT: the caller names the
+        /// level and no matching happens. <paramref name="elevationMm"/> is a
+        /// GUESS resolved by <see cref="FindNearestLevel"/> — nearest elevation
+        /// wins with no distance limit, and a tie goes to the older level, so a
+        /// level created moments ago can lose to a pre-existing one at the same
+        /// height. That silent near-miss built walls on the wrong storey; it now
+        /// leaves a warning naming the level that actually won and by how much it
+        /// differed.
+        /// </summary>
+        /// <param name="doc">Current document.</param>
+        /// <param name="levelId">Explicit Level ElementId, or -1/0 to match on elevation.</param>
+        /// <param name="elevationMm">Requested elevation in mm, used only when levelId is unset.</param>
+        /// <param name="warning">Human-readable note, or null when the resolution was unambiguous.</param>
+        /// <returns>The resolved Level, or null when the document has none.</returns>
+        public static Level ResolveLevel(this Document doc, int levelId, double elevationMm, out string warning)
+        {
+            warning = null;
+
+            if (levelId != -1 && levelId != 0)
+            {
+                if (doc.GetElement(new ElementId(levelId)) is Level named)
+                    return named;
+
+                // Falling through to elevation matching would quietly undo the
+                // one thing levelId exists to guarantee, so say so.
+                warning = $"levelId {levelId} does not name a Level in this document. " +
+                          $"Fell back to matching on baseLevel {elevationMm}mm.";
+            }
+
+            Level level = doc.FindNearestLevel(elevationMm / 304.8);
+            if (level == null)
+            {
+                warning = "This document contains no Levels, so nothing could be hosted.";
+                return null;
+            }
+
+            double deltaMm = (level.Elevation - elevationMm / 304.8) * 304.8;
+            if (Math.Abs(level.Elevation - elevationMm / 304.8) > LevelMatchToleranceFt)
+            {
+                string note = $"baseLevel {elevationMm}mm resolved to Level '{level.Name}' at " +
+                              $"{level.Elevation * 304.8:0.##}mm (off by {deltaMm:+0.##;-0.##}mm). " +
+                              $"Nearest elevation wins, so this may not be the level you meant — " +
+                              $"pass levelId {level.Id.GetValue()} (or the id of the level you want) to be certain.";
+                warning = warning == null ? note : warning + " " + note;
+            }
+
+            return level;
         }
 
         /// <summary>

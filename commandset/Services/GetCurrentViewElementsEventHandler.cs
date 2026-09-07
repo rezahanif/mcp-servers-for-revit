@@ -162,7 +162,7 @@ namespace RevitMCPCommandSet.Services
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("error", ex.Message);
+                System.Diagnostics.Trace.WriteLine(ex.Message, "error");
             }
             finally
             {

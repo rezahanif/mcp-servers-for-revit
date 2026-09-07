@@ -19,6 +19,14 @@ type ToolTiers = {
   tier2: Record<string, { command: string | null; reason: string }>;
 };
 
+/**
+ * Reliability text appended to every tier-1 description — see tool_notes.json
+ * for the wording rule and the measured cost. Appended HERE for the same reason
+ * tiering is enforced here: this is the one place every registration passes
+ * through, so no tool file can be added without it.
+ */
+type ToolNotes = { shared: string };
+
 export async function registerTools(server: McpServer) {
   // AiConnect: startup license gate — the server refuses to register any
   // tool (and therefore to serve) without a valid MCP_LICENSE_TOKEN.
@@ -32,6 +40,16 @@ export async function registerTools(server: McpServer) {
   );
   const TIER1 = new Set(tiers.tier1);
   const TIER2 = new Set(Object.keys(tiers.tier2));
+
+  const notes: ToolNotes = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "tool_notes.json"), "utf-8")
+  );
+  if (!notes.shared?.trim()) {
+    // Same failure class as N21 (assets never copied to build/): a missing or
+    // empty asset is silent, and the connector would ship 31 descriptions
+    // quietly stripped of the reliability contract.
+    throw new Error("tool_notes.json has no `shared` text — refusing to register.");
+  }
 
   const registeredNames: string[] = [];
   const suppressed: string[] = [];
@@ -58,6 +76,9 @@ export async function registerTools(server: McpServer) {
       );
     }
     registeredNames.push(name);
+    // Two-arity form (name, schema, handler) carries no description, so there
+    // is nothing to append to; every tier-1 tool uses the four-arity form.
+    const describedAs = handler ? `${desc}\n\n${notes.shared}` : desc;
     const cb = handler ?? schema;
     const wrapped = async (args: any, extra: any) => {
       // Optional chain, not a bare call: ensureLicensed() returns null when
@@ -75,7 +96,7 @@ export async function registerTools(server: McpServer) {
       }
       return result;
     };
-    if (handler) return origTool(name, desc, schema, wrapped);
+    if (handler) return origTool(name, describedAs, schema, wrapped);
     return origTool(name, schema, wrapped);
   };
 

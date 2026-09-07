@@ -6,7 +6,7 @@ import { RevitError, ConnectionError } from "./errors.js";
 export function registerAIElementFilterTool(server: McpServer) {
   server.tool(
     "ai_element_filter",
-    "An intelligent Revit element querying tool designed specifically for AI assistants to retrieve detailed element information from Revit projects. This tool allows the AI to request elements matching specific criteria (such as category, type, visibility, or spatial location) and then perform further analysis on the returned data to answer complex user queries about Revit model elements. Example: When a user asks 'Find all walls taller than 5m in the project', the AI would: 1) Call this tool with parameters: {\"filterCategory\": \"OST_Walls\", \"includeInstances\": true}, 2) Receive detailed information about all wall instances in the project, 3) Process the returned data to filter walls with height > 5000mm, 4) Present the filtered results to the user with relevant details.",
+    "Domain: any category — the general read path. An intelligent Revit element querying tool designed specifically for AI assistants to retrieve detailed element information from Revit projects. This is the tool to reach for in three situations the other read tools do not cover: verifying that a write or a create actually landed and on which level; checking whether something already exists at a location before creating a duplicate; and listing across the WHOLE document rather than the open view, which is what you get when filterVisibleInCurrentView is false or omitted. This tool allows the AI to request elements matching specific criteria (such as category, type, visibility, or spatial location) and then perform further analysis on the returned data to answer complex user queries about Revit model elements. Example: for 'find all walls taller than five metres', call it with {\"filterCategory\": \"OST_Walls\", \"includeInstances\": true}, then narrow the returned instances on height yourself — this tool selects, you analyse.",
     {
       data: z.object({
         filterCategory: z
@@ -32,7 +32,7 @@ export function registerAIElementFilterTool(server: McpServer) {
         filterVisibleInCurrentView: z
           .boolean()
           .optional()
-          .describe("Determines whether to only return elements that are visible in the current view. When set to true, only elements visible in the current view will be returned. Note: This filter only applies to element instances, not type elements."),
+          .describe("Determines whether to only return elements that are visible in the current view. When set to true, only elements visible in the current view will be returned — and which view that is can change during a session without you switching it, so a result set that shrinks between calls usually means the view changed, not the model. FALSE OR OMITTED SEARCHES THE WHOLE DOCUMENT, which is what you want for verifying a create, for finding an element that is not on screen, and for checking whether a location is already occupied. Note: This filter only applies to element instances, not type elements."),
         boundingBoxMin: z
           .object({
             p0: z.object({

@@ -49,6 +49,11 @@ namespace RevitMCPCommandSet.Services
         /// <summary>Input: elements and the parameters to write on each.</summary>
         public List<ElementUpdate> Updates { get; set; }
 
+        public string GetName()
+        {
+            return "Set Parameter Values";
+        }
+
         public bool IsSuccess { get; private set; }
         public int UpdatedCount { get; private set; }
         public List<Failure> Failures { get; private set; } = new List<Failure>();

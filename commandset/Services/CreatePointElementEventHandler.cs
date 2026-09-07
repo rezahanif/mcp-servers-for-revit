@@ -24,7 +24,10 @@ namespace RevitMCPCommandSet.Services
         /// 执行结果（传出数据）
         /// </summary>
         public AIResult<List<int>> Result { get; private set; }
+        /// <summary>Element WAS created, but something the caller cannot see happened to it.</summary>
         private List<string> _warnings = new List<string>();
+        /// <summary>Entry produced NO element. See AIResult.Failures for why the two are separate.</summary>
+        private List<string> _failures = new List<string>();
 
         /// <summary>
         /// 设置创建的参数
@@ -42,6 +45,7 @@ namespace RevitMCPCommandSet.Services
             {
                 var elementIds = new List<int>();
                 _warnings.Clear();
+                _failures.Clear();
                 foreach (var data in CreatedInfo)
                 {
                     int requestedTypeId = data.TypeId;
@@ -55,12 +59,16 @@ namespace RevitMCPCommandSet.Services
                     Level topLevel = null;
                     double topOffset = -1;  // ft
                     double baseOffset = -1; // ft
-                    baseLevel = doc.FindNearestLevel(data.BaseLevel / 304.8);
-                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
-                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Height) / 304.8);
-                    topOffset = (data.BaseLevel + data.BaseOffset + data.Height) / 304.8 - topLevel.Elevation;
+                    // levelId (exact) wins over baseLevel (nearest-elevation guess).
+                    baseLevel = doc.ResolveLevel(data.LevelId, data.BaseLevel, out string levelWarning);
+                    if (levelWarning != null)
+                        _warnings.Add(levelWarning);
+                    // Null-check before dereferencing Elevation, as in the line handler.
                     if (baseLevel == null)
                         continue;
+                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
+                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Height) / 304.8);
+                    topOffset = (data.BaseLevel + data.BaseOffset + data.Height) / 304.8 - (topLevel?.Elevation ?? 0);
 
                     // Step2 获取族类型
                     FamilySymbol symbol = null;
@@ -82,6 +90,14 @@ namespace RevitMCPCommandSet.Services
                         continue;
                     if (symbol == null)
                     {
+                        // A requested-but-unresolvable typeId now fails the entry;
+                        // only an ABSENT typeId still falls back to a default.
+                        if (requestedTypeId != -1 && requestedTypeId != 0)
+                        {
+                            _failures.Add($"Requested typeId {requestedTypeId} is not a FamilySymbol in this document. " +
+                                          $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                            continue;
+                        }
                         symbol = new FilteredElementCollector(doc)
                             .OfClass(typeof(FamilySymbol))
                             .OfCategory(builtInCategory)
@@ -97,13 +113,12 @@ namespace RevitMCPCommandSet.Services
                         }
                         if (symbol == null)
                         {
-                            _warnings.Add($"No family types available for category {builtInCategory}.");
+                            _failures.Add($"No family types available for category {builtInCategory}.");
                             continue;
                         }
-                        if (requestedTypeId != -1 && requestedTypeId != 0)
-                        {
-                            _warnings.Add($"Requested typeId {requestedTypeId} not found. Defaulted to '{symbol.FamilyName}: {symbol.Name}' (ID: {symbol.Id.GetValue()})");
-                        }
+                        _warnings.Add($"No typeId given for {builtInCategory}. Defaulted to " +
+                                      $"'{symbol.FamilyName}: {symbol.Name}' (ID: {symbol.Id.GetValue()}), " +
+                                      $"which is whichever type came first and is probably not the one you want.");
                     }
                     if (symbol == null)
                         continue;
@@ -215,15 +230,23 @@ namespace RevitMCPCommandSet.Services
                         transaction.Commit();
                     }
                 }
-                string message = $"Successfully created {elementIds.Count} element(s).";
+                // Success means every entry produced an element; a partial batch
+                // reports false so it cannot be mistaken for a complete one.
+                string message = $"Created {elementIds.Count} of {CreatedInfo.Count} element(s).";
+                if (_failures.Count > 0)
+                {
+                    message += "\n\n✖ Failed:\n  • " + string.Join("\n  • ", _failures);
+                }
                 if (_warnings.Count > 0)
                 {
                     message += "\n\n⚠ Warnings:\n  • " + string.Join("\n  • ", _warnings);
                 }
                 Result = new AIResult<List<int>>
                 {
-                    Success = true,
+                    Success = _failures.Count == 0,
                     Message = message,
+                    Warnings = new List<string>(_warnings),
+                    Failures = new List<string>(_failures),
                     Response = elementIds,
                 };
             }
@@ -232,9 +255,10 @@ namespace RevitMCPCommandSet.Services
                 Result = new AIResult<List<int>>
                 {
                     Success = false,
-                    Message = $"创建点状构件时出错: {ex.Message}",
+                    Message = $"Error creating point-based element(s): {ex.Message}",
+                    Failures = new List<string> { ex.ToString() },
                 };
-                TaskDialog.Show("错误", $"创建点状构件时出错: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"Error creating point-based element(s): {ex}", "revit-mcp");
             }
             finally
             {

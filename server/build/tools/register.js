@@ -11,6 +11,13 @@ export async function registerTools(server) {
     const tiers = JSON.parse(fs.readFileSync(path.join(__dirname, "tool_tiers.json"), "utf-8"));
     const TIER1 = new Set(tiers.tier1);
     const TIER2 = new Set(Object.keys(tiers.tier2));
+    const notes = JSON.parse(fs.readFileSync(path.join(__dirname, "tool_notes.json"), "utf-8"));
+    if (!notes.shared?.trim()) {
+        // Same failure class as N21 (assets never copied to build/): a missing or
+        // empty asset is silent, and the connector would ship 31 descriptions
+        // quietly stripped of the reliability contract.
+        throw new Error("tool_notes.json has no `shared` text — refusing to register.");
+    }
     const registeredNames = [];
     const suppressed = [];
     // AiConnect: wrap EVERY tool's handler — per-call license recheck + response
@@ -33,6 +40,9 @@ export async function registerTools(server) {
                 `Add it to tier1 if commandset/ implements its command, otherwise tier2.`);
         }
         registeredNames.push(name);
+        // Two-arity form (name, schema, handler) carries no description, so there
+        // is nothing to append to; every tier-1 tool uses the four-arity form.
+        const describedAs = handler ? `${desc}\n\n${notes.shared}` : desc;
         const cb = handler ?? schema;
         const wrapped = async (args, extra) => {
             // Optional chain, not a bare call: ensureLicensed() returns null when
@@ -47,7 +57,7 @@ export async function registerTools(server) {
             return result;
         };
         if (handler)
-            return origTool(name, desc, schema, wrapped);
+            return origTool(name, describedAs, schema, wrapped);
         return origTool(name, schema, wrapped);
     };
     const files = fs.readdirSync(__dirname);

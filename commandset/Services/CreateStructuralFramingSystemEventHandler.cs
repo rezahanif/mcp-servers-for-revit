@@ -272,7 +272,7 @@ namespace RevitMCPCommandSet.Services
                     Message = errorDetails,
                     Response = null
                 };
-                TaskDialog.Show("Error", errorDetails);
+                System.Diagnostics.Trace.WriteLine(errorDetails, "Error");
             }
             finally
             {

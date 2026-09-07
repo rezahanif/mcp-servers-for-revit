@@ -13,7 +13,7 @@ const transactionModeSchema = z
 export function registerSendCodeToRevitTool(server: McpServer) {
   server.tool(
     "send_code_to_revit",
-    "Send C# code to Revit for execution. The code will be inserted into a template with access to the Revit Document and parameters. Your code should be written to work within the Execute method of the template.",
+    "Domain: any category — the escape hatch. Send C# code to Revit for execution. The code will be inserted into a template with access to the Revit Document and parameters. Your code should be written to work within the Execute method of the template. This is also the ONLY way to run the capabilities that search_revit_api and query_revit_registry return as non-callable: none of those has a typed tool, and they are all executed through here. It compiles at runtime with Roslyn (Microsoft.CodeAnalysis.CSharp), which is loaded on the Revit side rather than by this server — if a call fails reporting that Microsoft.CodeAnalysis could not be loaded, the fault is the Revit-side installation and NO capability that routes through this tool is reachable in this session. Fall back to the typed tools and say so rather than retrying.",
     {
       code: z
         .string()

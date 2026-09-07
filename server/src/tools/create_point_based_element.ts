@@ -6,7 +6,7 @@ import { RevitError, ConnectionError } from "./errors.js";
 export function registerCreatePointBasedElementTool(server: McpServer) {
   server.tool(
     "create_point_based_element",
-    "Create one or more point-based elements in Revit such as doors, windows, or furniture. Supports batch creation with detailed parameters including family type ID, position, dimensions, and level information. All units are in millimeters (mm).",
+    "Domain: Architecture — hosted and free-standing components. Create one or more point-based elements in Revit such as doors, windows, or furniture. Supports batch creation with detailed parameters including family type ID, position, dimensions, and level information. All units are in millimeters (mm). This tool does not inspect what already occupies the point it is given, and it does not necessarily attach to the level you expect: read the typeId and baseLevel notes below.",
     {
       data: z
         .array(
@@ -17,7 +17,13 @@ export function registerCreatePointBasedElementTool(server: McpServer) {
             typeId: z
               .number()
               .optional()
-              .describe("The ID of the family type to create."),
+              .describe(
+                "ElementId of the FamilySymbol to instantiate. TREAT THIS AS REQUIRED. If it is omitted, 0, " +
+                  "-1, or names an id that does not resolve, the element is still created, using the first " +
+                  "active symbol of that category found in the document — arbitrary, and very often the wrong " +
+                  "family. The substitution is reported in `message` under 'Warnings' while `success` still " +
+                  "reads true. Resolve a real id with get_available_family_types before calling."
+              ),
             locationPoint: z
               .object({
                 x: z.number().describe("X coordinate"),
@@ -30,8 +36,30 @@ export function registerCreatePointBasedElementTool(server: McpServer) {
             width: z.number().describe("Width of the element in mm"),
             depth: z.number().optional().describe("Depth of the element in mm"),
             height: z.number().describe("Height of the element in mm"),
-            baseLevel: z.number().describe("Base level height"),
-            baseOffset: z.number().describe("Offset from the base level"),
+            baseLevel: z
+              .number()
+              .describe(
+                "Base elevation in mm. This is an ELEVATION, not an ElementId, and it is resolved by NEAREST " +
+                  "MATCH against the levels that already exist: the level with the smallest |elevation - " +
+                  "baseLevel| wins, with NO distance limit, and a tie goes to the older level. Creating a level " +
+                  "and then passing its elevation does NOT guarantee the element lands on it. Pass levelId " +
+                  "instead whenever you know which level you mean. When the match is not exact the resolved " +
+                  "level and the difference are reported in `message` under 'Warnings'."
+              ),
+            levelId: z
+              .number()
+              .optional()
+              .describe(
+                "ElementId of the Level to host the element on. PREFER THIS over baseLevel. When set, the level " +
+                  "is used directly and no elevation matching happens. Get ids from ai_element_filter with " +
+                  "filterCategory 'OST_Levels'. Omit (or pass -1) to fall back to matching on baseLevel."
+              ),
+            baseOffset: z
+              .number()
+              .describe(
+                "Offset in mm from the RESOLVED base level — which may not be the level whose elevation you " +
+                  "passed in baseLevel. The absolute height you asked for is preserved; only the host differs."
+              ),
             rotation: z
               .number()
               .optional()

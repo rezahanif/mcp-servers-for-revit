@@ -24,7 +24,27 @@ namespace RevitMCPCommandSet.Services
         /// 执行结果（传出数据）
         /// </summary>
         public AIResult<List<int>> Result { get; private set; }
+        /// <summary>
+        /// Something happened that the caller would not otherwise see, but the
+        /// element WAS created — a defaulted type, an inexact level match, an
+        /// ignored thickness, an overlap with existing geometry.
+        /// </summary>
         private List<string> _warnings = new List<string>();
+
+        /// <summary>
+        /// An entry that produced NO element. Separate from _warnings because the
+        /// two demand different reactions and used to be indistinguishable: both
+        /// arrived as prose under one Success=true, so a caller could not tell
+        /// "built, but check it" from "not built at all".
+        /// </summary>
+        private List<string> _failures = new List<string>();
+
+        /// <summary>
+        /// Existing walls per level, built lazily once per Execute and discarded
+        /// after — a snapshot taken before this batch adds anything, which is
+        /// exactly what "was something already here?" should be asked against.
+        /// </summary>
+        private Dictionary<ElementId, List<Wall>> _wallsByLevel;
 
         public string _wallName = "常规 - ";
         public string _ductName = "矩形风管 - ";
@@ -45,6 +65,8 @@ namespace RevitMCPCommandSet.Services
             {
                 var elementIds = new List<int>();
                 _warnings.Clear();
+                _failures.Clear();
+                _wallsByLevel = null; // rebuilt lazily against the CURRENT document
                 foreach (var data in CreatedInfo)
                 {
                     int requestedTypeId = data.TypeId;
@@ -54,16 +76,25 @@ namespace RevitMCPCommandSet.Services
                     Enum.TryParse(data.Category.Replace(".", ""), true, out builtInCategory);
 
                     // Step1 获取标高和偏移
+                    // levelId (exact) wins over baseLevel (nearest-elevation guess);
+                    // a guess that did not land where the caller asked leaves a warning
+                    // instead of silently hosting on a neighbouring storey.
                     Level baseLevel = null;
                     Level topLevel = null;
                     double topOffset = -1;  // ft
                     double baseOffset = -1; // ft
-                    baseLevel = doc.FindNearestLevel(data.BaseLevel / 304.8);
-                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
-                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Height) / 304.8);
-                    topOffset = (data.BaseLevel + data.BaseOffset + data.Height) / 304.8 - topLevel.Elevation;
+                    baseLevel = doc.ResolveLevel(data.LevelId, data.BaseLevel, out string levelWarning);
+                    if (levelWarning != null)
+                        _warnings.Add(levelWarning);
+                    // Null-check BEFORE dereferencing: the old order read
+                    // baseLevel.Elevation first, so a document with no Levels threw a
+                    // NullReferenceException here and the whole batch was reported as a
+                    // generic failure rather than as the one specific, fixable cause.
                     if (baseLevel == null)
                         continue;
+                    baseOffset = (data.BaseOffset + data.BaseLevel) / 304.8 - baseLevel.Elevation;
+                    topLevel = doc.FindNearestLevel((data.BaseLevel + data.BaseOffset + data.Height) / 304.8);
+                    topOffset = (data.BaseLevel + data.BaseOffset + data.Height) / 304.8 - (topLevel?.Elevation ?? 0);
 
                     // Step2 获取族类型
                     FamilySymbol symbol = null;
@@ -101,44 +132,74 @@ namespace RevitMCPCommandSet.Services
                         case BuiltInCategory.OST_Walls:
                             if (wallType == null)
                             {
-                                // Requested typeId was invalid or not provided, fall back to first available
+                                // A typeId the caller ASKED FOR and that did not resolve is
+                                // now a failure, not a substitution. Substituting produced
+                                // models built from an arbitrary first-in-collector type —
+                                // wrong material, wrong assembly — while still reporting
+                                // success. Only an ABSENT typeId still falls back.
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested wall typeId {requestedTypeId} is not a WallType in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 wallType = new FilteredElementCollector(doc)
                                     .OfClass(typeof(WallType))
                                     .Cast<WallType>()
                                     .FirstOrDefault();
                                 if (wallType == null)
                                 {
-                                    _warnings.Add($"No wall types available in project.");
+                                    _failures.Add($"No wall types available in project.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                _warnings.Add($"No typeId given for a wall. Defaulted to '{wallType.Name}' (ID: {wallType.Id.GetValue()}), " +
+                                              $"which is whichever type came first and is probably not the one you want.");
+                            }
+                            // `thickness` reaches Wall.Create nowhere — width is the
+                            // WallType's compound structure. Silently ignoring it let a
+                            // caller believe it had set a width it had not.
+                            if (data.Thickness > 0)
+                            {
+                                double actualMm = wallType.Width * 304.8;
+                                if (Math.Abs(actualMm - data.Thickness) > 1.0)
                                 {
-                                    _warnings.Add($"Requested wall typeId {requestedTypeId} not found. Defaulted to '{wallType.Name}' (ID: {wallType.Id.GetValue()})");
+                                    _warnings.Add($"thickness {data.Thickness}mm was ignored: wall width comes from type " +
+                                                  $"'{wallType.Name}', which is {actualMm:0.##}mm. Pass a different typeId to change width.");
                                 }
                             }
+                            WarnOnOverlappingWall(data, wallType, baseLevel);
                             break;
                         case BuiltInCategory.OST_DuctCurves:
                             if (ductType == null)
                             {
                                 // Requested typeId was invalid or not provided, fall back to first available rectangular duct
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested duct typeId {requestedTypeId} is not a DuctType in this document. " +
+                                                  $"Nothing was created for this entry.");
+                                    continue;
+                                }
                                 ductType = new FilteredElementCollector(doc)
                                     .OfClass(typeof(DuctType))
                                     .Cast<DuctType>()
                                     .FirstOrDefault(d => d.Shape == ConnectorProfileType.Rectangular);
                                 if (ductType == null)
                                 {
-                                    _warnings.Add($"No rectangular duct types available in project.");
+                                    _failures.Add($"No rectangular duct types available in project.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
-                                {
-                                    _warnings.Add($"Requested duct typeId {requestedTypeId} not found. Defaulted to '{ductType.Name}' (ID: {ductType.Id.GetValue()})");
-                                }
+                                _warnings.Add($"No typeId given for a duct. Defaulted to '{ductType.Name}' (ID: {ductType.Id.GetValue()}).");
                             }
                             break;
                         default:
                             if (symbol == null)
                             {
+                                if (requestedTypeId != -1 && requestedTypeId != 0)
+                                {
+                                    _failures.Add($"Requested typeId {requestedTypeId} is not a FamilySymbol in this document. " +
+                                                  $"Nothing was created for this entry. Resolve a real id with get_available_family_types.");
+                                    continue;
+                                }
                                 symbol = new FilteredElementCollector(doc)
                                     .OfClass(typeof(FamilySymbol))
                                     .OfCategory(builtInCategory)
@@ -154,13 +215,12 @@ namespace RevitMCPCommandSet.Services
                                 }
                                 if (symbol == null)
                                 {
-                                    _warnings.Add($"No family types available for category {builtInCategory}.");
+                                    _failures.Add($"No family types available for category {builtInCategory}.");
                                     continue;
                                 }
-                                if (requestedTypeId != -1 && requestedTypeId != 0)
-                                {
-                                    _warnings.Add($"Requested typeId {requestedTypeId} not found. Defaulted to '{symbol.FamilyName}: {symbol.Name}' (ID: {symbol.Id.GetValue()})");
-                                }
+                                _warnings.Add($"No typeId given for {builtInCategory}. Defaulted to " +
+                                              $"'{symbol.FamilyName}: {symbol.Name}' (ID: {symbol.Id.GetValue()}), " +
+                                              $"which is whichever type came first and is probably not the one you want.");
                             }
                             break;
                     }
@@ -234,26 +294,40 @@ namespace RevitMCPCommandSet.Services
                         transaction.Commit();
                     }
                 }
-                string message = $"Successfully created {elementIds.Count} element(s).";
+                // Success now means "every entry produced an element". A batch where
+                // some entries failed reports false, so a caller that checks only
+                // this flag cannot mistake a partial build for a complete one.
+                string message = $"Created {elementIds.Count} of {CreatedInfo.Count} element(s).";
+                if (_failures.Count > 0)
+                {
+                    message += "\n\n✖ Failed:\n  • " + string.Join("\n  • ", _failures);
+                }
                 if (_warnings.Count > 0)
                 {
                     message += "\n\n⚠ Warnings:\n  • " + string.Join("\n  • ", _warnings);
                 }
                 Result = new AIResult<List<int>>
                 {
-                    Success = true,
+                    Success = _failures.Count == 0,
                     Message = message,
+                    Warnings = new List<string>(_warnings),
+                    Failures = new List<string>(_failures),
                     Response = elementIds,
                 };
             }
             catch (Exception ex)
             {
+                // No TaskDialog: this runs inside a Revit external event with no
+                // human at the keyboard, so a modal blocks the handler until one
+                // arrives. The caller then times out at 120s having been told
+                // nothing — which is exactly how a committed transaction came back
+                // looking like a failure and got retried into duplicates.
                 Result = new AIResult<List<int>>
                 {
                     Success = false,
-                    Message = $"创建线状构件时出错: {ex.Message}",
+                    Message = $"Error creating line-based element(s): {ex.Message}",
+                    Failures = new List<string> { ex.ToString() },
                 };
-                TaskDialog.Show("错误", $"创建线状构件时出错: {ex.Message}");
             }
             finally
             {
@@ -278,6 +352,93 @@ namespace RevitMCPCommandSet.Services
         public string GetName()
         {
             return "创建线状构件";
+        }
+
+        /// <summary>
+        /// Warn when the requested wall would land on top of one that is already
+        /// there. Nothing in this command ever looked at the existing model, so a
+        /// caller re-running a step — or recovering from a timeout that had in fact
+        /// committed — stacked a second wall in the same place with no signal at
+        /// all. This does NOT block the create: only the caller knows whether a
+        /// second leaf is intended.
+        /// </summary>
+        private void WarnOnOverlappingWall(LineElement data, WallType wallType, Level level)
+        {
+            try
+            {
+                Line requested = JZLine.ToLine(data.LocationLine);
+                XYZ a0 = requested.GetEndPoint(0), a1 = requested.GetEndPoint(1);
+
+                // Collected ONCE per Execute, not once per entry. A collector scan
+                // inside the batch loop is O(entries x walls), and a large batch
+                // against a large model is exactly the case where the caller can
+                // least afford the extra seconds — a duplicate-detection aid that
+                // caused timeouts would be worse than no aid at all.
+                //
+                // Same storey only: walls on different levels sharing a plan
+                // position are the normal case in a multi-storey model.
+                if (_wallsByLevel == null)
+                {
+                    _wallsByLevel = new FilteredElementCollector(doc)
+                        .OfClass(typeof(Wall))
+                        .Cast<Wall>()
+                        .Where(w => w.Location is LocationCurve)
+                        .GroupBy(w => w.LevelId)
+                        .ToDictionary(g => g.Key, g => g.ToList());
+                }
+                if (!_wallsByLevel.TryGetValue(level.Id, out var existing))
+                    return;
+
+                foreach (Wall w in existing)
+                {
+                    if (w.Location is not LocationCurve lc || lc.Curve is not Line other)
+                        continue;
+
+                    XYZ b0 = other.GetEndPoint(0), b1 = other.GetEndPoint(1);
+
+                    // Collinear-and-overlapping in plan: both endpoints of the
+                    // requested line sit on the existing line's infinite extension,
+                    // and the two spans share more than a touching point.
+                    XYZ dir = (b1 - b0);
+                    if (dir.GetLength() < 1e-9)
+                        continue;
+                    dir = dir.Normalize();
+
+                    if (PlanDistanceToLine(a0, b0, dir) > CoincidenceToleranceFt ||
+                        PlanDistanceToLine(a1, b0, dir) > CoincidenceToleranceFt)
+                        continue;
+
+                    double ta0 = (a0 - b0).DotProduct(dir), ta1 = (a1 - b0).DotProduct(dir);
+                    double lo = Math.Min(ta0, ta1), hi = Math.Max(ta0, ta1);
+                    double overlap = Math.Min(hi, other.Length) - Math.Max(lo, 0);
+                    if (overlap <= CoincidenceToleranceFt)
+                        continue;
+
+                    _warnings.Add($"A wall already runs along this line on Level '{level.Name}': " +
+                                  $"'{w.Name}' (ID: {w.Id.GetValue()}), overlapping by {overlap * 304.8:0}mm. " +
+                                  $"Creating anyway — delete the existing one first if this was meant to replace it.");
+                    return;
+                }
+            }
+            catch
+            {
+                // A geometry probe must never cost the caller the create it asked
+                // for; an unreported overlap is strictly better than a lost wall.
+            }
+        }
+
+        /// <summary>1mm in feet — Revit's own coincidence threshold for this kind of check.</summary>
+        private const double CoincidenceToleranceFt = 1.0 / 304.8;
+
+        /// <summary>Perpendicular distance from <paramref name="p"/> to the line (origin, dir), ignoring Z.</summary>
+        private static double PlanDistanceToLine(XYZ p, XYZ origin, XYZ dir)
+        {
+            XYZ v = new XYZ(p.X - origin.X, p.Y - origin.Y, 0);
+            XYZ d = new XYZ(dir.X, dir.Y, 0);
+            if (d.GetLength() < 1e-9)
+                return v.GetLength();
+            d = d.Normalize();
+            return (v - d.Multiply(v.DotProduct(d))).GetLength();
         }
 
         /// <summary>

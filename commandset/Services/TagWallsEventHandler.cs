@@ -182,7 +182,7 @@ try
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("错误", $"标记墙体时出错: {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"标记墙体时出错: {ex.Message}", "错误");
                 TaggingResults = new
                 {
                     success = false,
