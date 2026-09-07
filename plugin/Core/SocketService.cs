@@ -20,11 +20,14 @@ namespace revit_mcp_plugin.Core
         private TcpListener _listener;
         private Thread _listenerThread;
         private bool _isRunning;
-        private int _port = 8080;
+        private int _port = 8088;
         private UIApplication _uiApp;
         private ICommandRegistry _commandRegistry;
         private ILogger _logger;
         private CommandExecutor _commandExecutor;
+        private RevitMCPSDK.API.Utils.RevitVersionAdapter _versionAdapter;
+
+        public string LastError { get; private set; }
 
         public static SocketService Instance
         {
@@ -62,8 +65,8 @@ namespace revit_mcp_plugin.Core
 
             // 记录当前 Revit 版本
             // Get the current Revit version.
-            var versionAdapter = new RevitMCPSDK.API.Utils.RevitVersionAdapter(_uiApp.Application);
-            string currentVersion = versionAdapter.GetRevitVersion();
+            _versionAdapter = new RevitMCPSDK.API.Utils.RevitVersionAdapter(_uiApp.Application);
+            string currentVersion = _versionAdapter.GetRevitVersion();
             _logger.Info("当前 Revit 版本: {0}\nCurrent Revit version: {0}", currentVersion);
 
 
@@ -78,7 +81,7 @@ namespace revit_mcp_plugin.Core
             configManager.LoadConfiguration();
             
 
-            // 从环境变量或配置中读取服务端口 (REVIT_SOCKET_PORT > Config.Settings.Port > 8080)
+            // 从环境变量或配置中读取服务端口 (REVIT_SOCKET_PORT > Config.Settings.Port > 8088)
             // Read service port from environment or configuration.
             var envPortStr = Environment.GetEnvironmentVariable("REVIT_SOCKET_PORT");
             if (!string.IsNullOrEmpty(envPortStr) && int.TryParse(envPortStr, out int envPort) && envPort > 0)
@@ -91,7 +94,7 @@ namespace revit_mcp_plugin.Core
             }
             else
             {
-                _port = 8080;
+                _port = 8088;
             }
 
             // 加载命令
@@ -136,6 +139,7 @@ namespace revit_mcp_plugin.Core
 
             try
             {
+                LastError = null;
                 _isRunning = true;
 
                 if (bindAny)
@@ -155,6 +159,7 @@ namespace revit_mcp_plugin.Core
             catch (Exception ex)
             {
                 _isRunning = false;
+                LastError = ex.Message;
                 _logger?.Error($"Failed to start Socket service on {bindAddress}:{_port}: {ex.Message}");
             }
         }
@@ -279,6 +284,19 @@ namespace revit_mcp_plugin.Core
                         JsonRPCErrorCodes.InvalidRequest,
                         "Invalid JSON-RPC request"
                     );
+                }
+
+                // 内置轻量级ping方法（用于MCP探针心跳握手，无需依赖文档或外部命令）
+                // Built-in lightweight ping method (used by MCP probe for handshake, no document required).
+                if (string.Equals(request.Method, "ping", StringComparison.OrdinalIgnoreCase))
+                {
+                    string revitVer = _versionAdapter?.GetRevitVersion() ?? "unknown";
+                    return CreateSuccessResponse(request.Id, new
+                    {
+                        status = "pong",
+                        revit_version = revitVer,
+                        port = _port
+                    });
                 }
 
                 // 查找命令

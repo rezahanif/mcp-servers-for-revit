@@ -55,7 +55,13 @@ def build_registry() -> bytes:
     generated rather than copied so it cannot drift from command.json.
     """
     data = json.loads(COMMAND_JSON.read_text(encoding="utf-8"))
-    return (json.dumps({"commands": data["commands"]}, indent=2) + "\n").encode("utf-8")
+    payload = {
+        "settings": {
+            "port": 8088
+        },
+        "commands": data["commands"]
+    }
+    return (json.dumps(payload, indent=2) + "\n").encode("utf-8")
 
 
 def main() -> int:
