@@ -1,0 +1,47 @@
+{
+  "_doc": "Discipline-scope filter, orthogonal to tool_tiers.json. A tool registers live iff it is tier-1 (see tool_tiers.json) AND its revit_function_registry.json `category` is in the active profile's category set, OR its name is in `always`. This adds no parallel per-tool list: profile membership is derived entirely from the `category` field each tool already carries in revit_function_registry.json.",
+  "_composition_rule": "Profile filtering can only ever SHRINK what tiering already allows; it never re-exposes a tier2 tool. A tier2 tool stays suppressed regardless of profile and remains reachable via search_revit_api / query_revit_registry / send_code_to_revit no matter which profile is active.",
+  "_why_these_five": "Mirrors REVIT_MCP_study's full/architect/mep/structural/fire-safety naming now that the tier2 gap-fill (see revit_function_registry.json's _ported_from_revit_mcp_study note) gives mep, structural, facade (architect-only), and compliance (fire-safety-only) categories real content to filter on. Before that gap-fill, every live (tier1) tool belonged to a cross-cutting category, so a profile system would have been a no-op; it now has real, if still tier2-only, payoff, and activates further as tier2 promotions land.",
+  "default": "full",
+  "always": [
+    "search_revit_api",
+    "query_revit_registry",
+    "list_revit_api_categories",
+    "list_revit_templates",
+    "load_revit_template",
+    "send_code_to_revit"
+  ],
+  "base_categories": [
+    "creation",
+    "annotation",
+    "query",
+    "modification",
+    "visualization",
+    "data",
+    "execution",
+    "system",
+    "interaction",
+    "interoperability",
+    "family",
+    "parameter",
+    "phasing",
+    "view_template",
+    "workset",
+    "inspection",
+    "coordination",
+    "scheduling",
+    "views",
+    "legend",
+    "materials",
+    "sheets",
+    "cad_import",
+    "cross_document"
+  ],
+  "profiles": {
+    "full": { "categories": "*" },
+    "architect": { "categories": ["facade"] },
+    "mep": { "categories": ["mep"] },
+    "structural": { "categories": ["structural"] },
+    "fire-safety": { "categories": ["compliance"] }
+  }
+}

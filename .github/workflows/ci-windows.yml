@@ -44,8 +44,10 @@ jobs:
           node-version: 20
       # Asserts no tier-1 tool depends on a Revit command that does not exist,
       # and that every tier-2 tool stays discoverable in the function registry.
+      # tool_profiles.test.mjs is a second file, not covered by a glob here, so
+      # it must be listed explicitly or CI silently stops checking it.
       - name: Tool tier invariants
-        run: node --test tests/tool_tiers.test.mjs
+        run: node --test tests/tool_tiers.test.mjs tests/tool_profiles.test.mjs
 
   validate-and-package:
     runs-on: windows-latest

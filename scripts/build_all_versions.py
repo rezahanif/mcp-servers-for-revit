@@ -78,6 +78,46 @@ def run_dotnet_build(project: Path, config: str) -> bool:
     return True
 
 
+def validate_build_invariants(ver: str, plugin_bin: Path, registry_bytes: bytes) -> bool:
+    """Validate target framework and configuration invariants before packaging."""
+    expected_tf = {
+        "2020": b".NETFramework,Version=v4.8",
+        "2021": b".NETFramework,Version=v4.8",
+        "2022": b".NETFramework,Version=v4.8",
+        "2023": b".NETFramework,Version=v4.8",
+        "2024": b".NETFramework,Version=v4.8",
+        "2025": b".NETCoreApp,Version=v8.0",
+        "2026": b".NETCoreApp,Version=v10.0",
+    }
+    plugin_dll = plugin_bin / "RevitMCPPlugin.dll"
+    if not plugin_dll.exists():
+        print(f"Error: {plugin_dll} does not exist", file=sys.stderr)
+        return False
+    dll_bytes = plugin_dll.read_bytes()
+    expected = expected_tf.get(ver)
+    if expected and expected not in dll_bytes:
+        print(f"Error: {plugin_dll.name} for Revit {ver} does not match expected target framework {expected.decode()}", file=sys.stderr)
+        return False
+
+    try:
+        reg_data = json.loads(registry_bytes.decode("utf-8"))
+        port = reg_data.get("settings", {}).get("port")
+        if port != 8088:
+            print(f"Error: commandRegistry.json port is {port}, expected 8088", file=sys.stderr)
+            return False
+        cmds = reg_data.get("commands", [])
+        if not cmds:
+            print("Error: commandRegistry.json has 0 commands", file=sys.stderr)
+            return False
+    except Exception as ex:
+        print(f"Error validating commandRegistry.json: {ex}", file=sys.stderr)
+        return False
+
+    exp_str = expected.decode() if expected else "any"
+    print(f"    Validated build invariants for Revit {ver} ({exp_str}, port 8088, {len(cmds)} commands).")
+    return True
+
+
 def package_version(ver: str, out_dir: Path) -> Path | None:
     config = CONFIG_MAP.get(ver)
     if not config:
@@ -112,6 +152,8 @@ def package_version(ver: str, out_dir: Path) -> Path | None:
         return None
 
     registry_bytes = build_command_registry()
+    if not validate_build_invariants(ver, plugin_bin, registry_bytes):
+        return None
     out_zip = out_dir / f"RevitMCPPlugin-{ver}.zip"
 
     manifest_file = plugin_bin / "mcp-servers-for-revit.addin"
@@ -205,7 +247,7 @@ def main() -> int:
                         help="Revit versions to build (default: 2025 2026)")
     parser.add_argument("--no-build", action="store_true", help="Skip compilation, only package")
     parser.add_argument("--out-dir", default=str(ROOT), help="Output directory for zip archives")
-    parser.add_argument("--deploy", action="store_true", help="Extract built zip directly into %APPDATA% Revit Addins folder")
+    parser.add_argument("--deploy", action="store_true", help="Extract built zip directly into %%APPDATA%% Revit Addins folder")
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir).resolve()

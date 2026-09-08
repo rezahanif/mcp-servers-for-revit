@@ -18,8 +18,32 @@ export async function registerTools(server) {
         // quietly stripped of the reliability contract.
         throw new Error("tool_notes.json has no `shared` text — refusing to register.");
     }
+    const registry = JSON.parse(fs.readFileSync(path.join(__dirname, "revit_function_registry.json"), "utf-8"));
+    const categoryByName = new Map(registry.entries
+        .filter((e) => e.kind === "Tool" && e.category)
+        .map((e) => [e.path, e.category]));
+    const profileConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "tool_profiles.json"), "utf-8"));
+    const requestedProfile = process.env.MCP_PROFILE || profileConfig.default;
+    const activeProfileDef = profileConfig.profiles[requestedProfile];
+    if (!activeProfileDef) {
+        console.error(`Unknown MCP_PROFILE="${requestedProfile}", falling back to "${profileConfig.default}".`);
+    }
+    const resolvedProfileName = activeProfileDef ? requestedProfile : profileConfig.default;
+    const resolvedProfile = activeProfileDef ?? profileConfig.profiles[profileConfig.default];
+    const allowAllCategories = resolvedProfile.categories === "*";
+    const allowedCategories = allowAllCategories
+        ? null
+        : new Set([...profileConfig.base_categories, ...resolvedProfile.categories]);
+    const alwaysNames = new Set(profileConfig.always);
+    const passesProfile = (name) => {
+        if (allowAllCategories || alwaysNames.has(name))
+            return true;
+        const cat = categoryByName.get(name);
+        return !!cat && allowedCategories.has(cat);
+    };
     const registeredNames = [];
-    const suppressed = [];
+    const suppressedTier2 = [];
+    const suppressedByProfile = [];
     // AiConnect: wrap EVERY tool's handler — per-call license recheck + response
     // envelope. Generic monkey-patch of server.tool, so the tool files need zero
     // edits. This is also where tiering is enforced, for the same reason: it is
@@ -28,7 +52,7 @@ export async function registerTools(server) {
     const origTool = server.tool.bind(server);
     server.tool = (name, desc, schema, handler) => {
         if (TIER2.has(name)) {
-            suppressed.push(name);
+            suppressedTier2.push(name);
             return;
         }
         if (!TIER1.has(name)) {
@@ -38,6 +62,13 @@ export async function registerTools(server) {
             // anyone context.
             throw new Error(`Tool "${name}" appears in neither tier1 nor tier2 of tool_tiers.json. ` +
                 `Add it to tier1 if commandset/ implements its command, otherwise tier2.`);
+        }
+        if (!passesProfile(name)) {
+            // Implemented, but out of scope for the active discipline profile.
+            // Still tier-1 — still reachable if the profile changes, and still
+            // discoverable via the tier-2 search path regardless of profile.
+            suppressedByProfile.push(name);
+            return;
         }
         registeredNames.push(name);
         // Two-arity form (name, schema, handler) carries no description, so there
@@ -85,15 +116,20 @@ export async function registerTools(server) {
         }
     }
     // The loader assertion that caught the 0-byte-file bug, now keyed to the
-    // manifest instead of a hand-synced filename list: a tool file that fails to
-    // load, or is deleted, shows up here as a missing tier-1 name.
-    if (registeredNames.length !== TIER1.size) {
+    // profile-adjusted expected set instead of the flat tier1 count: under a
+    // non-"full" profile, fewer than TIER1.size tools are expected to register,
+    // so the raw count would otherwise trip this check on every profiled run.
+    // Under "full" (categories: "*"), allowedTier1 degenerates to exactly
+    // TIER1, so behavior is byte-identical to before profiles existed.
+    const allowedTier1 = new Set(tiers.tier1.filter((t) => passesProfile(t)));
+    if (registeredNames.length !== allowedTier1.size) {
         const got = new Set(registeredNames);
-        const missing = tiers.tier1.filter((t) => !got.has(t));
-        throw new Error(`Tool registration incomplete: expected ${TIER1.size} tier-1 tools, got ` +
-            `${registeredNames.length}. Missing: ${missing.join(", ")}`);
+        const missing = [...allowedTier1].filter((t) => !got.has(t));
+        throw new Error(`Tool registration incomplete for profile "${resolvedProfileName}": expected ` +
+            `${allowedTier1.size} tools, got ${registeredNames.length}. Missing: ${missing.join(", ")}`);
     }
-    console.error(`Registered ${registeredNames.length} tier-1 tools; ` +
-        `${suppressed.length} tier-2 tools withheld from the tool surface ` +
-        `(discoverable via search_revit_api, executable via send_code_to_revit).`);
+    console.error(`Registered ${registeredNames.length} tier-1 tools for profile "${resolvedProfileName}"; ` +
+        `${suppressedTier2.length} tier-2 tools withheld (discoverable via search_revit_api, ` +
+        `executable via send_code_to_revit); ${suppressedByProfile.length} tier-1 tools withheld ` +
+        `by profile filtering (still discoverable — profile does not affect the tier-2 escape hatch).`);
 }

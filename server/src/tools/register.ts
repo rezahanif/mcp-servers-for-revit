@@ -13,10 +13,28 @@ import { ensureLicensed, envelope } from "../aioconnect.js";
  * spend tool-surface tokens in every session to advertise a capability that
  * fails at the bridge. They remain reachable through search_revit_api /
  * query_revit_registry and executable through send_code_to_revit.
+ *
+ * Tool PROFILES (tool_profiles.json) are an orthogonal second axis, layered on
+ * top of tiering, not a replacement for it: tiering answers "is this
+ * implemented?", profile answers "is this in scope for this session's
+ * discipline?" A tool registers live iff it is tier-1 AND its
+ * revit_function_registry.json category is in the active MCP_PROFILE's scope
+ * (or its name is in tool_profiles.json's `always` list). Profile filtering can
+ * only shrink what tiering already allows — it can never re-expose a tier-2
+ * tool, which stays reachable via the search/exec escape hatch regardless of
+ * profile.
  */
 type ToolTiers = {
   tier1: string[];
   tier2: Record<string, { command: string | null; reason: string }>;
+};
+
+type ToolRegistryEntry = { path: string; kind: string; category?: string };
+type ToolProfiles = {
+  default: string;
+  always: string[];
+  base_categories: string[];
+  profiles: Record<string, { categories: string[] | "*" }>;
 };
 
 /**
@@ -51,8 +69,42 @@ export async function registerTools(server: McpServer) {
     throw new Error("tool_notes.json has no `shared` text — refusing to register.");
   }
 
+  const registry: { entries: ToolRegistryEntry[] } = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "revit_function_registry.json"), "utf-8")
+  );
+  const categoryByName = new Map(
+    registry.entries
+      .filter((e) => e.kind === "Tool" && e.category)
+      .map((e) => [e.path, e.category as string])
+  );
+
+  const profileConfig: ToolProfiles = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "tool_profiles.json"), "utf-8")
+  );
+  const requestedProfile = process.env.MCP_PROFILE || profileConfig.default;
+  const activeProfileDef = profileConfig.profiles[requestedProfile];
+  if (!activeProfileDef) {
+    console.error(
+      `Unknown MCP_PROFILE="${requestedProfile}", falling back to "${profileConfig.default}".`
+    );
+  }
+  const resolvedProfileName = activeProfileDef ? requestedProfile : profileConfig.default;
+  const resolvedProfile = activeProfileDef ?? profileConfig.profiles[profileConfig.default];
+  const allowAllCategories = resolvedProfile.categories === "*";
+  const allowedCategories = allowAllCategories
+    ? null
+    : new Set([...profileConfig.base_categories, ...(resolvedProfile.categories as string[])]);
+  const alwaysNames = new Set(profileConfig.always);
+
+  const passesProfile = (name: string): boolean => {
+    if (allowAllCategories || alwaysNames.has(name)) return true;
+    const cat = categoryByName.get(name);
+    return !!cat && allowedCategories!.has(cat);
+  };
+
   const registeredNames: string[] = [];
-  const suppressed: string[] = [];
+  const suppressedTier2: string[] = [];
+  const suppressedByProfile: string[] = [];
 
   // AiConnect: wrap EVERY tool's handler — per-call license recheck + response
   // envelope. Generic monkey-patch of server.tool, so the tool files need zero
@@ -62,7 +114,7 @@ export async function registerTools(server: McpServer) {
   const origTool = (server as any).tool.bind(server);
   (server as any).tool = (name: string, desc: string, schema: any, handler?: any) => {
     if (TIER2.has(name)) {
-      suppressed.push(name);
+      suppressedTier2.push(name);
       return;
     }
     if (!TIER1.has(name)) {
@@ -74,6 +126,13 @@ export async function registerTools(server: McpServer) {
         `Tool "${name}" appears in neither tier1 nor tier2 of tool_tiers.json. ` +
           `Add it to tier1 if commandset/ implements its command, otherwise tier2.`
       );
+    }
+    if (!passesProfile(name)) {
+      // Implemented, but out of scope for the active discipline profile.
+      // Still tier-1 — still reachable if the profile changes, and still
+      // discoverable via the tier-2 search path regardless of profile.
+      suppressedByProfile.push(name);
+      return;
     }
     registeredNames.push(name);
     // Two-arity form (name, schema, handler) carries no description, so there
@@ -134,20 +193,25 @@ export async function registerTools(server: McpServer) {
   }
 
   // The loader assertion that caught the 0-byte-file bug, now keyed to the
-  // manifest instead of a hand-synced filename list: a tool file that fails to
-  // load, or is deleted, shows up here as a missing tier-1 name.
-  if (registeredNames.length !== TIER1.size) {
+  // profile-adjusted expected set instead of the flat tier1 count: under a
+  // non-"full" profile, fewer than TIER1.size tools are expected to register,
+  // so the raw count would otherwise trip this check on every profiled run.
+  // Under "full" (categories: "*"), allowedTier1 degenerates to exactly
+  // TIER1, so behavior is byte-identical to before profiles existed.
+  const allowedTier1 = new Set(tiers.tier1.filter((t) => passesProfile(t)));
+  if (registeredNames.length !== allowedTier1.size) {
     const got = new Set(registeredNames);
-    const missing = tiers.tier1.filter((t) => !got.has(t));
+    const missing = [...allowedTier1].filter((t) => !got.has(t));
     throw new Error(
-      `Tool registration incomplete: expected ${TIER1.size} tier-1 tools, got ` +
-        `${registeredNames.length}. Missing: ${missing.join(", ")}`
+      `Tool registration incomplete for profile "${resolvedProfileName}": expected ` +
+        `${allowedTier1.size} tools, got ${registeredNames.length}. Missing: ${missing.join(", ")}`
     );
   }
 
   console.error(
-    `Registered ${registeredNames.length} tier-1 tools; ` +
-      `${suppressed.length} tier-2 tools withheld from the tool surface ` +
-      `(discoverable via search_revit_api, executable via send_code_to_revit).`
+    `Registered ${registeredNames.length} tier-1 tools for profile "${resolvedProfileName}"; ` +
+      `${suppressedTier2.length} tier-2 tools withheld (discoverable via search_revit_api, ` +
+      `executable via send_code_to_revit); ${suppressedByProfile.length} tier-1 tools withheld ` +
+      `by profile filtering (still discoverable — profile does not affect the tier-2 escape hatch).`
   );
 }

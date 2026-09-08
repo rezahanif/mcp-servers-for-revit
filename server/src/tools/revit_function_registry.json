@@ -1,6 +1,7 @@
 {
   "source": "revit-mcp tool definitions + commandset C# commands",
-  "total_entries": 120,
+  "_ported_from_revit_mcp_study": "Entries carrying a `source_reference` field (tier: 3, verification_status: 'planned') were added by diffing this connector's tool set against REVIT_MCP_study, a separate fully-implemented Revit MCP project, to find genuine capability gaps. Tools REVIT_MCP_study has that duplicate this repo's generic creation tools (create_line_based_element, create_point_based_element, create_surface_based_element, place_family_instance) or its generic read path (ai_element_filter, query_revit_registry) were deliberately excluded, not ported. tier: 3 is intentionally NOT tier: 2 — see tool_tiers.json's `_planned_gap_tools`: tier2 there means a real server.tool() TS definition already exists (only the C# handler is missing), which is not yet true for any of these. A 'planned' entry becomes a real tier2 entry (added to tool_tiers.json) the day its TS tool file + zod schema is written, using `source_reference` as the porting reference.",
+  "total_entries": 285,
   "entries": [
     {
       "path": "create_room",
@@ -1045,6 +1046,1473 @@
       "category": "interoperability",
       "verification_status": "seeded",
       "tier": 1
+    },
+    {
+      "path": "get_project_info",
+      "kind": "Tool",
+      "description": "Get current project basic info (name, building, owner)",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "set_project_units",
+      "kind": "Tool",
+      "description": "Batch-switch project display units to a preset system/mode with per-unit overrides",
+      "category": "system",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "get_all_levels",
+      "kind": "Tool",
+      "description": "List all project levels with elevations",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "get_all_views",
+      "kind": "Tool",
+      "description": "List all views, optionally filtered by type/level",
+      "category": "views",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "get_active_view",
+      "kind": "Tool",
+      "description": "Get info on the currently active view",
+      "category": "views",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "set_active_view",
+      "kind": "Tool",
+      "description": "Switch to a specified view",
+      "category": "views",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "rename_view",
+      "kind": "Tool",
+      "description": "Rename a view (locale-independent)",
+      "category": "views",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "zoom_to_element",
+      "kind": "Tool",
+      "description": "Zoom the active view to an element",
+      "category": "interaction",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "measure_distance",
+      "kind": "Tool",
+      "description": "Measure distance between two points",
+      "category": "interaction",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "move_element",
+      "kind": "Tool",
+      "description": "Move an element by dx/dy/dz",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "flip_element",
+      "kind": "Tool",
+      "description": "Flip an element (facing/hand)",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "adjust_section_datums",
+      "kind": "Tool",
+      "description": "Auto-adjust grid/level 2D extents and bubbles in section views",
+      "category": "views",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "analyze_floor_slopes",
+      "kind": "Tool",
+      "description": "Analyze floor top-surface drainage slope via face normal vs Z-axis",
+      "category": "inspection",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "load_shared_parameters",
+      "kind": "Tool",
+      "description": "Load a shared parameter file and bind params to category Type/Instance",
+      "category": "parameter",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/base-tools.ts"
+    },
+    {
+      "path": "create_corridor_dimension",
+      "kind": "Tool",
+      "description": "Auto-detect parallel corridor walls and create wall-to-wall dimension",
+      "category": "annotation",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "query_walls_by_location",
+      "kind": "Tool",
+      "description": "Query walls near a coordinate (spatial proximity, not attribute filter)",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "unjoin_wall_joins",
+      "kind": "Tool",
+      "description": "Unjoin walls from columns/other geometry",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "rejoin_wall_joins",
+      "kind": "Tool",
+      "description": "Restore joins previously removed by any unjoin_* tool",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "unjoin_column_joins",
+      "kind": "Tool",
+      "description": "Unjoin columns from neighboring elements",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "unjoin_element_joins",
+      "kind": "Tool",
+      "description": "Generic unjoin between any source category and target categories",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "join_wall_tops",
+      "kind": "Tool",
+      "description": "Join wall tops to floors/ceilings/beams above, per level",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_all_grids",
+      "kind": "Tool",
+      "description": "Get all project grid lines",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_column_types",
+      "kind": "Tool",
+      "description": "Get available column types",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_wall_types",
+      "kind": "Tool",
+      "description": "List available wall types",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_furniture_types",
+      "kind": "Tool",
+      "description": "List loaded furniture types",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_line_styles",
+      "kind": "Tool",
+      "description": "Get available line styles/graphics styles",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "change_element_type",
+      "kind": "Tool",
+      "description": "Change an element's (or batch of elements') type",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "trace_stair_geometry",
+      "kind": "Tool",
+      "description": "Detect occluded stair edge lines for dashed-line drawing",
+      "category": "inspection",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/wall-tools.ts"
+    },
+    {
+      "path": "get_room_info",
+      "kind": "Tool",
+      "description": "Get room center point and boundary info",
+      "category": "query",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "get_rooms_by_level",
+      "kind": "Tool",
+      "description": "List rooms on a level (name/number/area/use)",
+      "category": "query",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "analyze_tall_partition_rooms",
+      "kind": "Tool",
+      "description": "Find rooms bordering/containing tall partition walls above a height threshold",
+      "category": "inspection",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "get_room_door_counts",
+      "kind": "Tool",
+      "description": "Count doors per room",
+      "category": "inspection",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "get_room_window_counts",
+      "kind": "Tool",
+      "description": "Count windows per room",
+      "category": "inspection",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "renumber_rooms_by_level",
+      "kind": "Tool",
+      "description": "Batch-renumber placed rooms on a level in top-to-bottom, left-to-right order",
+      "category": "modification",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "sync_room_ceiling_finish_from_ceilings",
+      "kind": "Tool",
+      "description": "Detect ceilings per room and sync a room finish parameter",
+      "category": "modification",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "remap_room_finish_codes",
+      "kind": "Tool",
+      "description": "Batch remap room finish-code parameter tokens",
+      "category": "modification",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "check_sanitary_fixture_requirements",
+      "kind": "Tool",
+      "description": "Calculate required sanitary fixtures by building type/occupancy",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "get_room_daylight_info",
+      "kind": "Tool",
+      "description": "Compute room daylight ratio for code compliance",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "check_exterior_wall_openings",
+      "kind": "Tool",
+      "description": "Check exterior wall openings against building code",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "get_room_surface_areas",
+      "kind": "Tool",
+      "description": "Calculate room interior surface areas with opening deduction and finish-layer detection",
+      "category": "scheduling",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "create_finish_legend",
+      "kind": "Tool",
+      "description": "Auto-build a paint/finish fill-pattern legend view",
+      "category": "legend",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "batch_set_room_height",
+      "kind": "Tool",
+      "description": "Batch-set Room Upper Limit/Limit Offset by name/use group",
+      "category": "modification",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/room-tools.ts"
+    },
+    {
+      "path": "analyze_corridor_width",
+      "kind": "Tool",
+      "description": "Detect parallel wall pairs and report corridor width/compliance per segment",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/corridor-analysis-tools.ts"
+    },
+    {
+      "path": "create_green_material",
+      "kind": "Tool",
+      "description": "Create a pure green-building-material Material in the project",
+      "category": "materials",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "create_material",
+      "kind": "Tool",
+      "description": "Create a standalone Material with its own AppearanceAssetElement",
+      "category": "materials",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "create_material_by_domain",
+      "kind": "Tool",
+      "description": "Create a pure Material per domain naming rules",
+      "category": "materials",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "get_all_materials",
+      "kind": "Tool",
+      "description": "List existing project materials",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "duplicate_element_type",
+      "kind": "Tool",
+      "description": "Duplicate an ElementType and assign new finish/structure materials into its compound structure",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "duplicate_type_only",
+      "kind": "Tool",
+      "description": "Duplicate an ElementType without touching materials/compound structure",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "set_green_material_type_parameters",
+      "kind": "Tool",
+      "description": "Write green-material shared-parameter schema values onto a Type",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "inject_green_material_into_family",
+      "kind": "Tool",
+      "description": "Inject green-material data into a loadable family, creating a new Type and reloading",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "set_material_surface_pattern",
+      "kind": "Tool",
+      "description": "Assign/create a surface (or cut) fill pattern for a material",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "create_single_material_type",
+      "kind": "Tool",
+      "description": "Duplicate a Type and assign one pure green material to all its layers",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "create_multi_layer_type",
+      "kind": "Tool",
+      "description": "Duplicate a Type and assign an arbitrary list of materials/layers to its compound structure",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "set_category_visibility",
+      "kind": "Tool",
+      "description": "Hide/show an entire category in a view",
+      "category": "visualization",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "hide_elements",
+      "kind": "Tool",
+      "description": "Hide elements in a view",
+      "category": "visualization",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "unhide_elements",
+      "kind": "Tool",
+      "description": "Unhide elements in a view",
+      "category": "visualization",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "get_types_by_category",
+      "kind": "Tool",
+      "description": "List types in a category with current material info",
+      "category": "query",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "assign_existing_material",
+      "kind": "Tool",
+      "description": "Assign an existing material to Types (no new material creation)",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "batch_set_material",
+      "kind": "Tool",
+      "description": "Batch-modify Type materials by duplicating and recoloring the original material",
+      "category": "materials",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/visualization-tools.ts"
+    },
+    {
+      "path": "list_schedules",
+      "kind": "Tool",
+      "description": "List all readable schedules in the project",
+      "category": "scheduling",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/schedule-tools.ts"
+    },
+    {
+      "path": "get_connector_info",
+      "kind": "Tool",
+      "description": "Get MEP element connector info (coordinates, connection state, shape)",
+      "category": "mep",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "get_mep_segments_and_sizes",
+      "kind": "Tool",
+      "description": "Inventory the project's MEP pipe segment/duct size catalogs",
+      "category": "mep",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "get_mep_settings",
+      "kind": "Tool",
+      "description": "Read non-catalog MEP Settings pages (angles, slopes, fluids, calculation)",
+      "category": "mep",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "get_mep_size_usage",
+      "kind": "Tool",
+      "description": "Scan the model for which MEP catalog sizes are actually used",
+      "category": "mep",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "curate_mep_sizes",
+      "kind": "Tool",
+      "description": "Add/remove MEP duct/pipe sizes in the catalog with usage-guarded deletion",
+      "category": "mep",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "get_space_centroid",
+      "kind": "Tool",
+      "description": "Return representative center point for each MEP Space",
+      "category": "mep",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "add_pipe_cap",
+      "kind": "Tool",
+      "description": "Install a pipe cap/flange on an open connector end",
+      "category": "mep",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "export_families",
+      "kind": "Tool",
+      "description": "Export loaded editable families (pipe fittings/accessories) to .rfa files",
+      "category": "family",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/mep-tools.ts"
+    },
+    {
+      "path": "get_curtain_wall_info",
+      "kind": "Tool",
+      "description": "Get curtain wall grid/panel layout info",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "get_curtain_panel_types",
+      "kind": "Tool",
+      "description": "List available curtain panel types",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "create_curtain_panel_type",
+      "kind": "Tool",
+      "description": "Create a new curtain panel type with color/transparency",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "apply_panel_pattern",
+      "kind": "Tool",
+      "description": "Apply a panel arrangement pattern to a curtain wall",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "create_curtain_wall_elevations",
+      "kind": "Tool",
+      "description": "Batch-create permanent exterior elevation views per curtain wall",
+      "category": "facade",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "diagnose_curtain_wall_elevation_direction",
+      "kind": "Tool",
+      "description": "Non-destructive diagnosis of a curtain wall's elevation direction resolution",
+      "category": "facade",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "diagnose_curtain_wall_elevation_directions",
+      "kind": "Tool",
+      "description": "Batch non-destructive elevation direction diagnostic",
+      "category": "facade",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "diagnose_curtain_wall_elevation_dimensions",
+      "kind": "Tool",
+      "description": "Non-destructive diagnosis of curtain elevation dimension annotation",
+      "category": "facade",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "create_facade_panel",
+      "kind": "Tool",
+      "description": "Create a single facade panel (DirectShape) in one of several geometry types",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "create_facade_from_analysis",
+      "kind": "Tool",
+      "description": "Batch-create a full facade of multiple DirectShape panels from an analysis result",
+      "category": "facade",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/curtain-wall-tools.ts"
+    },
+    {
+      "path": "check_smoke_exhaust_windows",
+      "kind": "Tool",
+      "description": "Check openable-window area under ceiling meets smoke exhaust code minimum",
+      "category": "compliance",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "check_floor_effective_openings",
+      "kind": "Tool",
+      "description": "Check exterior effective opening area against no-opening-floor determination",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "create_section_view",
+      "kind": "Tool",
+      "description": "Create a section view facing a target wall",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "create_detail_lines",
+      "kind": "Tool",
+      "description": "Draw detail lines (ceiling line, effective-band range, etc.) in a view",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "create_filled_region",
+      "kind": "Tool",
+      "description": "Create a filled region (e.g. effective smoke-band color block)",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "create_text_note",
+      "kind": "Tool",
+      "description": "Create a text note in a view",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "export_smoke_review_excel",
+      "kind": "Tool",
+      "description": "Export a multi-sheet smoke-exhaust review Excel report",
+      "category": "data",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-exhaust-tools.ts"
+    },
+    {
+      "path": "analyze_smoke_detectors",
+      "kind": "Tool",
+      "description": "Scan detectors/AC outlets/rooms and return distances for code checks",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-detector-tools.ts"
+    },
+    {
+      "path": "visualize_detector_results",
+      "kind": "Tool",
+      "description": "Color-code detectors by pass/fail/warn result",
+      "category": "visualization",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/smoke-detector-tools.ts"
+    },
+    {
+      "path": "create_parallel_section_view",
+      "kind": "Tool",
+      "description": "Auto-create a cropped section view based on wall opening/sleeve positions",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/parallel-section-tools.ts"
+    },
+    {
+      "path": "batch_create_wall_sections",
+      "kind": "Tool",
+      "description": "Batch-create sleeve section views for all walls with detected openings",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/parallel-section-tools.ts"
+    },
+    {
+      "path": "create_stair_section_view",
+      "kind": "Tool",
+      "description": "Create a stair-compliance-check section view (auto-detect run direction)",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/stair-compliance-tools.ts"
+    },
+    {
+      "path": "get_stair_actual_width",
+      "kind": "Tool",
+      "description": "Get a stair run's real measured width",
+      "category": "query",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/stair-compliance-tools.ts"
+    },
+    {
+      "path": "check_stair_headroom",
+      "kind": "Tool",
+      "description": "Check stair headroom clearance against code",
+      "category": "compliance",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/stair-compliance-tools.ts"
+    },
+    {
+      "path": "create_stair_text_note_with_leader",
+      "kind": "Tool",
+      "description": "Create a leadered text note for marking stair violations",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/stair-compliance-tools.ts"
+    },
+    {
+      "path": "get_all_sheets",
+      "kind": "Tool",
+      "description": "List all project sheets",
+      "category": "sheets",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "get_titleblocks",
+      "kind": "Tool",
+      "description": "List available title block types",
+      "category": "sheets",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "create_sheets",
+      "kind": "Tool",
+      "description": "Batch-create blank sheets from a list",
+      "category": "sheets",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "auto_renumber_sheets",
+      "kind": "Tool",
+      "description": "Merge suffixed sheets back into the main numbering sequence",
+      "category": "sheets",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "get_viewport_map",
+      "kind": "Tool",
+      "description": "Get viewport-to-sheet mapping",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "get_sheet_viewport_details",
+      "kind": "Tool",
+      "description": "Get detailed viewport bounding-box info on a sheet",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "arrange_viewports_on_sheet",
+      "kind": "Tool",
+      "description": "Arrange viewports on a sheet in order (horizontal/vertical, edge-aligned)",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "scale_drafting_view_width",
+      "kind": "Tool",
+      "description": "Scale DraftingView table width (X-axis only) on a sheet",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "scale_drafting_view_height",
+      "kind": "Tool",
+      "description": "Scale DraftingView table row height (Y-axis only) on a sheet",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/sheet-tools.ts"
+    },
+    {
+      "path": "get_detail_components",
+      "kind": "Tool",
+      "description": "Query detail component instances in the project",
+      "category": "annotation",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-component-tools.ts"
+    },
+    {
+      "path": "create_detail_component_type",
+      "kind": "Tool",
+      "description": "Duplicate a detail item family and auto-fill sheet/detail number parameters",
+      "category": "family",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-component-tools.ts"
+    },
+    {
+      "path": "sync_detail_component_numbers",
+      "kind": "Tool",
+      "description": "Sync detail component type parameters with their placed sheet's number/name",
+      "category": "annotation",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-component-tools.ts"
+    },
+    {
+      "path": "list_family_symbols",
+      "kind": "Tool",
+      "description": "List FamilySymbols, filterable by name",
+      "category": "family",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-component-tools.ts"
+    },
+    {
+      "path": "dedup_detail_elements_in_view",
+      "kind": "Tool",
+      "description": "Find/delete duplicate detail elements in a view, preferring group members",
+      "category": "modification",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-component-tools.ts"
+    },
+    {
+      "path": "create_dimension_by_ray",
+      "kind": "Tool",
+      "description": "Create a dimension via ray-casting from an origin point",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dimension-tools.ts"
+    },
+    {
+      "path": "create_dimension_by_bounding_box",
+      "kind": "Tool",
+      "description": "Auto-dimension a room's net size using its bounding box",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dimension-tools.ts"
+    },
+    {
+      "path": "auto_dimension_walls",
+      "kind": "Tool",
+      "description": "Batch auto-dimension wall segments",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dimension-tools.ts"
+    },
+    {
+      "path": "calculate_grid_bounds",
+      "kind": "Tool",
+      "description": "Compute bounding box for given X/Y grid ranges",
+      "category": "query",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dependent-view-tools.ts"
+    },
+    {
+      "path": "create_dependent_views",
+      "kind": "Tool",
+      "description": "Batch-create and crop dependent views from a parent view and bounds",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dependent-view-tools.ts"
+    },
+    {
+      "path": "get_dwg_column_layers",
+      "kind": "Tool",
+      "description": "Scan CAD layers in the active plan view, recommend column-containing layers",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-column-tools.ts"
+    },
+    {
+      "path": "preview_dwg_columns",
+      "kind": "Tool",
+      "description": "Parse rectangular geometry on a layer, preview detected column info",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-column-tools.ts"
+    },
+    {
+      "path": "create_columns_from_dwg",
+      "kind": "Tool",
+      "description": "Batch-create structural/architectural columns from a CAD layer",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-column-tools.ts"
+    },
+    {
+      "path": "get_dwg_beam_layers",
+      "kind": "Tool",
+      "description": "Scan CAD layers, recommend beam/label layers",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-beam-tools.ts"
+    },
+    {
+      "path": "preview_dwg_beams",
+      "kind": "Tool",
+      "description": "Parse double-line geometry, preview detected beam centerlines",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-beam-tools.ts"
+    },
+    {
+      "path": "create_beams_from_dwg",
+      "kind": "Tool",
+      "description": "Create structural beams from a CAD layer, batched by role",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dwg-beam-tools.ts"
+    },
+    {
+      "path": "get_dwg_block_instances",
+      "kind": "Tool",
+      "description": "Scan a linked DWG for block (INSERT) instances",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cad-block-placement-tools.ts"
+    },
+    {
+      "path": "preview_family_instances_from_dwg_blocks",
+      "kind": "Tool",
+      "description": "Preview coordinate-chain health check for placing instances at block insertion points",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cad-block-placement-tools.ts"
+    },
+    {
+      "path": "create_family_instances_from_dwg_blocks",
+      "kind": "Tool",
+      "description": "Create family instances at DWG block insertion points",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cad-block-placement-tools.ts"
+    },
+    {
+      "path": "link_cad_to_view",
+      "kind": "Tool",
+      "description": "Link a DWG/DXF file to a specified Revit view",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cad-link-tools.ts"
+    },
+    {
+      "path": "link_cads_by_floor",
+      "kind": "Tool",
+      "description": "Batch-link multiple CAD files to matching floor plan views, aligned to grid intersections",
+      "category": "cad_import",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cad-link-tools.ts"
+    },
+    {
+      "path": "get_linked_models",
+      "kind": "Tool",
+      "description": "List all linked model instances",
+      "category": "coordination",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "query_linked_elements",
+      "kind": "Tool",
+      "description": "Query elements in a linked model with filters",
+      "category": "coordination",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "get_element_geometry",
+      "kind": "Tool",
+      "description": "Extract geometry (centerline/bbox/solid) for an element, main or linked",
+      "category": "coordination",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "scan_opening_candidates",
+      "kind": "Tool",
+      "description": "Read-only scan for MEP-through-structure opening candidates with clearance calc",
+      "category": "coordination",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "colorize_clashes",
+      "kind": "Tool",
+      "description": "Color-code clash-detection results onto structural elements",
+      "category": "coordination",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "export_clash_report",
+      "kind": "Tool",
+      "description": "Export clash-detection results as CSV/JSON report",
+      "category": "coordination",
+      "verification_status": "verified",
+      "tier": 1,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/clash-tools.ts"
+    },
+    {
+      "path": "get_door_window_legend",
+      "kind": "Tool",
+      "description": "Multi-mode (list/create/update/migrate) door/window legend generator",
+      "category": "legend",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/door-window-legend-tools.ts"
+    },
+    {
+      "path": "list_seeds",
+      "kind": "Tool",
+      "description": "List seed candidates (e.g. legend seed views) for user selection",
+      "category": "legend",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/list-seeds-tools.ts"
+    },
+    {
+      "path": "list_dimension_types",
+      "kind": "Tool",
+      "description": "List available DimensionTypes in the project",
+      "category": "query",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/dimension-type-tools.ts"
+    },
+    {
+      "path": "list_legend_views",
+      "kind": "Tool",
+      "description": "List Legend views and their door/window legend component counts",
+      "category": "legend",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/legend-view-tools.ts"
+    },
+    {
+      "path": "create_legends",
+      "kind": "Tool",
+      "description": "Batch-duplicate legend views from a seed legend",
+      "category": "legend",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/legend-tools.ts"
+    },
+    {
+      "path": "read_excel_tables",
+      "kind": "Tool",
+      "description": "Read named tables/worksheets from an Excel file within print area",
+      "category": "data",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/legend-tools.ts"
+    },
+    {
+      "path": "import_excel_to_drafting_views",
+      "kind": "Tool",
+      "description": "Import Excel worksheets into Drafting Views with borders and text",
+      "category": "data",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/legend-tools.ts"
+    },
+    {
+      "path": "analyze_beam_penetration",
+      "kind": "Tool",
+      "description": "Analyze sleeve penetrations on a structural beam",
+      "category": "structural",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/structure-tools.ts"
+    },
+    {
+      "path": "scan_penetrated_beams_in_view",
+      "kind": "Tool",
+      "description": "Scan the current view for beams penetrated by sleeves",
+      "category": "structural",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/structure-tools.ts"
+    },
+    {
+      "path": "grade_toposolid_to_floors",
+      "kind": "Tool",
+      "description": "Grade a Toposolid to match floor bottom-face footprints",
+      "category": "modification",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/grading-tools.ts"
+    },
+    {
+      "path": "sync_ifc_structural_to_native",
+      "kind": "Tool",
+      "description": "Convert linked IFC structural framing/columns into native Revit structural elements",
+      "category": "structural",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/ifc-structural-sync-tools.ts"
+    },
+    {
+      "path": "copy_detail_items_to_views",
+      "kind": "Tool",
+      "description": "Batch-copy detail items (curves/text/regions/components/dimensions) between views",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/detail-copy-tools.ts"
+    },
+    {
+      "path": "set_scope_box_for_views",
+      "kind": "Tool",
+      "description": "Batch-bind a set of views' crop to a named ScopeBox",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/scope-box-tools.ts"
+    },
+    {
+      "path": "align_view_cropbox_to_element",
+      "kind": "Tool",
+      "description": "Align a view's CropBox to a target element's bounding box",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/view-cropbox-tools.ts"
+    },
+    {
+      "path": "shift_view_cropbox",
+      "kind": "Tool",
+      "description": "Translate a view's CropBox in its own coordinate system",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/view-cropbox-tools.ts"
+    },
+    {
+      "path": "move_text_notes_in_views",
+      "kind": "Tool",
+      "description": "Batch-move TextNotes matching a text substring across multiple DraftingViews",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/text-note-tools.ts"
+    },
+    {
+      "path": "align_titleblocks_on_sheets",
+      "kind": "Tool",
+      "description": "Batch-align title blocks across multiple sheets to a common anchor point",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/titleblock-align-tools.ts"
+    },
+    {
+      "path": "create_floor_plans_from_template",
+      "kind": "Tool",
+      "description": "Batch-create floor plan views on multiple levels from a template view",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/view-creation-tools.ts"
+    },
+    {
+      "path": "debug_viewport_geometry",
+      "kind": "Tool",
+      "description": "Dump a viewport's coordinate data for diagnostics",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/viewport-position-tools.ts"
+    },
+    {
+      "path": "position_viewports_on_sheet",
+      "kind": "Tool",
+      "description": "Batch-move viewports on a sheet to an anchor-defined position",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/viewport-position-tools.ts"
+    },
+    {
+      "path": "move_viewport_titles",
+      "kind": "Tool",
+      "description": "Batch-move viewport title (label) positions",
+      "category": "sheets",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/viewport-position-tools.ts"
+    },
+    {
+      "path": "read_source_file_sheets",
+      "kind": "Tool",
+      "description": "Open a source .rvt and read sheet/viewport/view metadata, detecting conflicts",
+      "category": "cross_document",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cross-document-tools.ts"
+    },
+    {
+      "path": "copy_sheets_from_file",
+      "kind": "Tool",
+      "description": "Copy sheets (and matching/creating views, viewports) from a source .rvt",
+      "category": "cross_document",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cross-document-tools.ts"
+    },
+    {
+      "path": "sync_sheet_parameters_from_source",
+      "kind": "Tool",
+      "description": "Sync custom sheet parameters from a source file for existing sheets",
+      "category": "cross_document",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/cross-document-tools.ts"
+    },
+    {
+      "path": "calculate_selected_detail_line_perimeter",
+      "kind": "Tool",
+      "description": "Sum curve lengths from current selection for scaffold takeoff",
+      "category": "scheduling",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/scaffold-tools.ts"
+    },
+    {
+      "path": "calculate_exterior_wall_scaffold_perimeter",
+      "kind": "Tool",
+      "description": "Auto-detect exterior walls via ray exposure test and sum perimeter for scaffold takeoff",
+      "category": "scheduling",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/scaffold-tools.ts"
+    },
+    {
+      "path": "calculate_room_scaffold_perimeters",
+      "kind": "Tool",
+      "description": "Classify rooms and compute scaffold quantities",
+      "category": "scheduling",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/scaffold-tools.ts"
+    },
+    {
+      "path": "duplicate_views_with_detailing",
+      "kind": "Tool",
+      "description": "Duplicate views with detailing, optional rename and crop-region copy",
+      "category": "views",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/view-duplicate-tools.ts"
+    },
+    {
+      "path": "create_rc_filled_region",
+      "kind": "Tool",
+      "description": "Create RC filled-region hatch stickers detected from RC element outlines",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/fill-region-tools.ts"
+    },
+    {
+      "path": "batch_create_rc_filled_region",
+      "kind": "Tool",
+      "description": "Batch-create RC filled-region stickers across multiple views or sheets",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/fill-region-tools.ts"
+    },
+    {
+      "path": "convert_drafting_to_model_pattern",
+      "kind": "Tool",
+      "description": "Convert drafting fill patterns to model fill patterns document-wide",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/fill-region-tools.ts"
+    },
+    {
+      "path": "auto_convert_rotated_viewport_patterns",
+      "kind": "Tool",
+      "description": "Auto-fix fill pattern orientation on rotated viewports",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/fill-region-tools.ts"
+    },
+    {
+      "path": "create_room_filled_regions",
+      "kind": "Tool",
+      "description": "Create filled regions covering rooms (for color-marking)",
+      "category": "annotation",
+      "verification_status": "planned",
+      "tier": 3,
+      "source_reference": "REVIT_MCP_study/MCP-Server/src/tools/fill-region-tools.ts"
     }
   ]
 }

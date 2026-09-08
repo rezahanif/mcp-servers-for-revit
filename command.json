@@ -177,6 +177,281 @@
       "commandName": "export_navisworks",
       "description": "Export the Revit model to a Navisworks coordination file (.nwc)",
       "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_detail_component_type",
+      "description": "/// Command to duplicate a detail item family type and auto-fill sheet/detail parameters ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_detail_components",
+      "description": "/// Command to query detail component instances in the project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "change_element_type",
+      "description": "/// Command to change an element's (or a batch of elements') type ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "flip_element",
+      "description": "/// Command to flip a family instance element (facing or hand) ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_all_grids",
+      "description": "/// Command to get all grid lines in the project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_all_levels",
+      "description": "/// Command to get the list of all levels in the project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_column_types",
+      "description": "/// Command to get available column types ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_furniture_types",
+      "description": "/// Command to list loaded furniture types ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_line_styles",
+      "description": "/// Command to get available line styles (GraphicsStyles) ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_project_info",
+      "description": "/// Command to get basic information about the current Revit project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_wall_types",
+      "description": "/// Command to list available wall types ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "move_element",
+      "description": "/// Command to move an element by a dx/dy/dz displacement (mm) ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "trace_stair_geometry",
+      "description": "/// Command to trace assembled-stair geometry and detect occluded step edges in the active view ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_curtain_wall_info",
+      "description": "/// Command to get detailed curtain wall information ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "check_smoke_exhaust_windows",
+      "description": "/// Smoke-exhaust window compliance check (building-code §101 / fire-code §188). /// Ported from REVIT_MCP_study's CommandExecutor.CheckSmokeExhaustWindows. ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_green_material",
+      "description": "Create a standalone Material with a specified RGB color (used for green-building/test materials).",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_material_by_domain",
+      "description": "Create a pure standalone Material (no prefixing, no default-wall base) with a fixed light color.",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_material",
+      "description": "Create a standalone Material with its own AppearanceAssetElement.",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_connector_info",
+      "description": "/// Command to get connector (pipe/duct/conduit end-point) info for an MEP element ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_mep_segments_and_sizes",
+      "description": "/// Command to inventory the project's MEP pipe segment and duct size catalogs (read-only) ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "auto_renumber_sheets",
+      "description": "/// Command to auto-renumber \"-1\" suffixed insert sheets back into the main sequence ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_sheets",
+      "description": "/// Command to batch-create blank sheets ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_all_sheets",
+      "description": "/// Command to list all sheets in the project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_titleblocks",
+      "description": "/// Command to list all title block types in the project ///",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "unjoin_wall_joins",
+      "description": "Unjoin wall joins on specified walls or all walls in active view",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "rejoin_wall_joins",
+      "description": "Rejoin wall joins that were previously unjoined",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "unjoin_column_joins",
+      "description": "Unjoin architectural and structural columns from walls/floors",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "unjoin_element_joins",
+      "description": "Unjoin joins on specified elements by IDs",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "join_wall_tops",
+      "description": "Join wall tops with floors or roofs above them",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_all_views",
+      "description": "Get the list of all printable non-template views in the project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_active_view",
+      "description": "Get information about the currently active view",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_active_view",
+      "description": "Switch to the specified view",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "rename_view",
+      "description": "Rename the specified Revit view",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "zoom_to_element",
+      "description": "Zoom the active view to the specified element",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "measure_distance",
+      "description": "Measure the 3D distance between two points (in mm)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_room_info",
+      "description": "Get detailed room info: center coordinates, bounding-box extents, and boundary segments",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_walls_by_location",
+      "description": "Query walls near a coordinate with thickness, location-line, and wall faces",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_linked_models",
+      "description": "List every linked model in the current project with instance ID, file name, and transform",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_linked_elements",
+      "description": "Query elements inside a specific linked model transformed into main-model space",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_element_geometry",
+      "description": "Extract geometry representation (centerline, boundingbox, solid) for an element",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "colorize_clashes",
+      "description": "Apply graphic overrides in a view to elements found by clash detection",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "export_clash_report",
+      "description": "Export the result of clash detection as a CSV or JSON report file",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "get_curtain_panel_types",
+      "description": "Get all curtain wall panel types available in the project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_curtain_panel_type",
+      "description": "Create a new curtain wall panel type with an optional color and transparency",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "apply_panel_pattern",
+      "description": "Apply a panel arrangement pattern to a curtain wall using type mapping and arrangement matrix",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_facade_panel",
+      "description": "Create a single facade panel (DirectShape) with parametric geometry",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_facade_from_analysis",
+      "description": "Batch-create a full facade based on an analysis result as DirectShape panels",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "adjust_section_datums",
+      "description": "Automatically adjust the 2D extents and bubble display of grids and levels in section views",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "analyze_floor_slopes",
+      "description": "Analyze floor top-surface drainage slope percentage and write back to parameters",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_corridor_dimension",
+      "description": "Corridor width dimensioning - auto-detect parallel wall pairs and create wall-to-wall dimensions",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "dedup_detail_elements_in_view",
+      "description": "Find and deduplicate detail elements in a view across detail groups",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "sync_detail_component_numbers",
+      "description": "Auto-sync detail component type parameters with placed sheet number and name",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "list_family_symbols",
+      "description": "List FamilySymbols (family types) in the project with optional name filter",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "load_shared_parameters",
+      "description": "Load a shared parameter file and bind definitions to categories",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_project_units",
+      "description": "Set project display units to a preset mode or custom configuration",
+      "assemblyPath": "RevitMCPCommandSet.dll"
     }
   ]
 }

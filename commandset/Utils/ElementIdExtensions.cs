@@ -27,5 +27,14 @@ namespace RevitMCPCommandSet.Utils
 #else
         public static int GetIntValue(this ElementId id) => id.IntegerValue;
 #endif
+
+        public static ElementId FromLong(long id)
+        {
+#if REVIT2024_OR_GREATER
+            return new ElementId(id);
+#else
+            return new ElementId((int)id);
+#endif
+        }
     }
 }
